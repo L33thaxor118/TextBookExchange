@@ -10,6 +10,7 @@ stages:
   - deploy
 
 variables:
+  DOCKER_DRIVER: overlay
   GITLAB_CONTAINER: registry.gitlab.com/cache-me-outside/textbook-exchange-frontend
   CONTAINER_TAG: latest
   HEROKU_CONTAINER: registry.heroku.com/uofi-book-exchange/web
@@ -42,17 +43,6 @@ test:react:
   script:
     - npm run test
 
-dockerize:
-  image: docker:latest
-  stage: dockerize
-  before_script:
-    - docker login -u gitlab-ci-token -p "$CI_BUILD_TOKEN" "$CI_REGISTRY"
-  script:
-    - docker build -t $GITLAB_CONTAINER:$CONTAINER_TAG .
-    - docker push $GITLAB_CONTAINER:$CONTAINER_TAG
-  only:
-    - master
-
 deploy:heroku:
   image: docker:latest
   stage: deploy
@@ -60,13 +50,12 @@ deploy:heroku:
     name: prod
     url: https://uofi-book-exchange.herokuapp.com/
   before_script:
-    - apk add --update curl bash nodejs
-    # Install Heroku CLI
-    - curl https://cli-assets.heroku.com/install.sh | sh
-    - docker login -u gitlab-ci-token -p "$CI_BUILD_TOKEN" "$CI_REGISTRY"
+    - apk add --no-cache curl
   script:
+    - docker build -f Dockerfile --iidfile imageid.txt -t $HEROKU_CONTAINER .
     - docker login --username=$HEROKU_USER --password=$HEROKU_API_KEY registry.heroku.com
-    - docker pull $GITLAB_CONTAINER:$CONTAINER_TAG
-    - docker tag $GITLAB_CONTAINER:$CONTAINER_TAG $HEROKU_CONTAINER
-    # Release heroku deployment
-    - heroku container:release web --app=/uofi-book-exchange
+    - docker push $HEROKU_CONTAINER
+    - |-
+      curl -X PATCH https://api.heroku.com/apps/uofi-book-exchange/formation --header "Content-Type: application/json" --header "Accept: application/vnd.heroku+json; version=3.docker-releases" --header "Authorization: Bearer ${HEROKU_API_KEY}" --data '{"updates": [ {"type": "web", "docker_image": "'$(cat imageid.txt)'" }]}'
+  only:
+    - master
