@@ -1,0 +1,72 @@
+image: node:latest
+services:
+  - docker:dind
+
+stages:
+  - prebuild
+  - build
+  - test
+  - dockerize
+  - deploy
+
+variables:
+  GITLAB_CONTAINER: registry.gitlab.com/cache-me-outside/textbook-exchange-frontend
+  CONTAINER_TAG: latest
+  HEROKU_CONTAINER: registry.heroku.com/uofi-book-exchange/web
+  HEROKU_USER: alanrgan@gmail.com
+
+prebuild:
+  stage: prebuild
+  script:
+    - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+    - echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+    - apt-get update && sudo apt-get install yarn
+    - yarn install
+  artifacts:
+    paths:
+      - node_modules
+  cache:
+    paths:
+      - node_modules
+
+build:react:
+  stage: build
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - build
+
+test:react:
+  stage: test
+  script:
+    - npm run test
+
+dockerize:
+  image: docker:latest
+  stage: dockerize
+  before_script:
+    - docker login -u gitlab-ci-token -p "$CI_BUILD_TOKEN" "$CI_REGISTRY"
+  script:
+    - docker build -t $GITLAB_CONTAINER:$CONTAINER_TAG .
+    - docker push $GITLAB_CONTAINER:$CONTAINER_TAG
+  only:
+    - master
+
+deploy:heroku:
+  image: docker:latest
+  stage: deploy
+  environment:
+    name: prod
+    url: https://uofi-book-exchange.herokuapp.com/
+  before_script:
+    - apk add --update curl bash nodejs
+    # Install Heroku CLI
+    - curl https://cli-assets.heroku.com/install.sh | sh
+    - docker login -u gitlab-ci-token -p "$CI_BUILD_TOKEN" "$CI_REGISTRY"
+  script:
+    - docker login --username=$HEROKU_USER --password=$HEROKU_API_KEY registry.heroku.com
+    - docker pull $GITLAB_CONTAINER:$CONTAINER_TAG
+    - docker tag $GITLAB_CONTAINER:$CONTAINER_TAG $HEROKU_CONTAINER
+    # Release heroku deployment
+    - heroku container:release web --app=/uofi-book-exchange
