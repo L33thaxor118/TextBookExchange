@@ -1,26 +1,29 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import {BrowserRouter as Router, Route, Switch} from 'react-router-dom'
+// import 'semantic-ui-css/semantic.css';
 import './App.css';
 
+// Include new Components here
+// import Home from './Home/Home'
+import Search from './Search';
+import UserAuthentication from './Sign_in';
+
+// Currently displays Sign_in and Search components for testing purposes
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Hello world
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <Router>
+        <div className="pageContainer">
+          <h3>Sign_in Component</h3>
+          <Switch>
+            <Route exact path='/' component={UserAuthentication}/>
+          </Switch>
+        </div>
+        <div>
+          <h3>Search Component</h3>
+					<Route exact path='/' component={Search}/>
+    		</div>
+      </Router>
     );
   }
 }
