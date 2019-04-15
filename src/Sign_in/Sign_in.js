@@ -1,13 +1,13 @@
 import { Button, Checkbox, Form } from 'semantic-ui-react';
 import React, { Component } from 'react';
-import styles from './Sign_in.scss';
+import styles from './Sign_in.module.scss';
 
 class UserAuthentication extends Component {
   constructor() {
     super();
     this.state = {
       error: false
-    }
+    };
 
   }
 
@@ -29,8 +29,10 @@ class UserAuthentication extends Component {
           <Button type='submit'>Submit</Button>
         </Form>
       </div>
-    )
+    );
   }
+
+
 
 }
 
