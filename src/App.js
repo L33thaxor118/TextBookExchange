@@ -1,10 +1,20 @@
 import React, { Component } from 'react';
-import {BrowserRouter as Router, Route, Switch, Link} from 'react-router-dom'
-import UserAuthentication from './Sign_in/Sign_in'
+import {BrowserRouter as Router, Route, Switch, Link, Redirect} from 'react-router-dom';
+import UserAuthentication from './Sign_in/Sign_in';
+import CreateListing from './CreateListing/CreateListing';
 import logo from './logo.svg';
 import './App.css';
 import 'semantic-ui-css/semantic.css';
+import { authentication } from './Utils/Firebase/firebase';
 
+//Source for ProtectedRoute:
+//https://medium.com/@leonardobrunolima/react-tips-how-to-protect-routes-for-unauthorized-access-with-react-router-v4-73c0d451e0a2
+const ProtectedRoute = ({ component: Component, ...rest }) => (
+   <Route {...rest} render={(props) => (
+      authentication.currentUser != null ?
+         <Component {...props} /> : <Redirect to={{ pathname: process.env.PUBLIC_URL + '/', state: { from: props.location }}} />
+   )} />
+);
 
 class App extends Component {
   render() {
@@ -13,11 +23,13 @@ class App extends Component {
         <div className="pageContainer">
           <Switch>
             <Route exact path={process.env.PUBLIC_URL + '/'} component={UserAuthentication}/>
+            <ProtectedRoute exact path={process.env.PUBLIC_URL + '/CreateListing'} component={CreateListing}/>
           </Switch>
         </div>
       </Router>
     );
   }
 }
+
 
 export default App;
