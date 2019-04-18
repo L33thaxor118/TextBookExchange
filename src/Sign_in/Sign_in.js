@@ -1,7 +1,7 @@
-import { Button, Checkbox, Form } from 'semantic-ui-react';
+import { Button, Checkbox, Form, Message} from 'semantic-ui-react';
 import React, { Component } from 'react';
 import styles from './Sign_in.module.scss';
-import Firebase from '../Firebase/firebase';
+import { authentication } from '../Utils/Firebase/firebase';
 
 class UserAuthentication extends Component {
   constructor() {
@@ -9,9 +9,10 @@ class UserAuthentication extends Component {
     this.state = {
       email: "",
       password: "",
-      error: false
+      error: false,
+      errorMsg: ""
     };
-    this.firebase = new Firebase();
+    this.errorMessage = '';
     this.signUpHandler = this.signUpHandler.bind(this);
     this.signInHandler = this.signInHandler.bind(this);
     this.emailInputChanged = this.emailInputChanged.bind(this);
@@ -19,23 +20,30 @@ class UserAuthentication extends Component {
   }
 
   signUpHandler() {
-    this.firebase.doCreateUserWithEmailAndPassword(this.state.email, this.state.password).catch(function(error) {
+    authentication.createUserWithEmailAndPassword(this.state.email, this.state.password).then(function(user){
+      this.props.history.push('/CreateListing');
+    }).catch((error)=> {
     // Handle Errors here.
     var errorCode = error.code;
     var errorMessage = error.message;
+    this.setState({error:true, errorMsg: error.message});
     console.log(error.message);
     // ...
-    }).then(()=>{console.log("success")}, (error)=>{console.log(error.message)});
+    });
   }
 
   signInHandler() {
-    this.firebase.doSignInWithEmailAndPassword(this.state.email, this.state.password).catch(function(error) {
+    authentication.signInWithEmailAndPassword(this.state.email, this.state.password).then((user)=>{
+      console.log("success");
+      this.props.history.push('/CreateListing');
+    }).catch((error)=> {
     // Handle Errors here.
     var errorCode = error.code;
     var errorMessage = error.message;
+    this.setState({error:true, errorMsg: error.message});
     console.log(error.message);
     // ...
-    }).then(()=>{console.log("success")}, (error)=>{console.log(error.message)});
+    });
   }
 
   emailInputChanged(event) {
@@ -52,6 +60,11 @@ class UserAuthentication extends Component {
 
 
   render() {
+    var errorMessage = (  <Message
+        header='Action Forbidden'
+        content={this.state.errorMsg}
+      />);
+
     return (
       <div className={styles.container}>
         <Form>
@@ -61,13 +74,11 @@ class UserAuthentication extends Component {
           </Form.Field>
           <Form.Field>
             <label>Password</label>
-            <input placeholder='password' onChange={this.passwordInputChanged}/>
-          </Form.Field>
-          <Form.Field>
-            <Checkbox label='I agree to the Terms and Conditions' />
+            <input type= 'password' placeholder='password' onChange={this.passwordInputChanged}/>
           </Form.Field>
           <Button type='submit' onClick={this.signUpHandler}>Sign Up</Button>
           <Button type='submit' onClick={this.signInHandler}>Sign In</Button>
+          {this.state.error ? errorMessage : null}
         </Form>
       </div>
     );
