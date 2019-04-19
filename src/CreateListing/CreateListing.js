@@ -1,4 +1,4 @@
-import { Button, Checkbox, Form } from 'semantic-ui-react';
+import { Button, Form } from 'semantic-ui-react';
 import React, { Component } from 'react';
 import styles from './CreateListing.module.scss';
 import UploadComponent from './UploadComponent/UploadComponent';
@@ -13,14 +13,15 @@ const mockListingObject = {
     listedBy: '1aac05e55da23fsd436cc47c',
     price: 20
   };
+//// TODO: Add upload from file as opposed to drag and drop
 
 function createObjectURL(object) {
     return (window.URL) ? window.URL.createObjectURL(object) : window.webkitURL.createObjectURL(object);
 }
 
-function revokeObjectURL(url) {
-    return (window.URL) ? window.URL.revokeObjectURL(url) : window.webkitURL.revokeObjectURL(url);
-}
+// function revokeObjectURL(url) {
+//     return (window.URL) ? window.URL.revokeObjectURL(url) : window.webkitURL.revokeObjectURL(url);
+// }
 
 class CreateListing extends Component {
   constructor() {
