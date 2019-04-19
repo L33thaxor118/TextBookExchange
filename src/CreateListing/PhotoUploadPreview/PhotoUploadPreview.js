@@ -1,4 +1,3 @@
-import { Button, Checkbox, Form } from 'semantic-ui-react';
 import React, { Component } from 'react';
 import styles from './PhotoUploadPreview.module.scss';
 
@@ -14,7 +13,7 @@ class PhotoUploadPreview extends Component {
   render() {
     return (
       <div className={styles.container}>
-        <img src={this.props.photo}/>
+        <img alt="upload" src={this.props.photo}/>
         <h1 onClick={this.remove}>X</h1>
       </div>
     );

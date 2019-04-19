@@ -1,4 +1,3 @@
-import { Button, Checkbox, Form } from 'semantic-ui-react';
 import React, { Component } from 'react';
 import styles from './UploadComponent.module.scss';
 

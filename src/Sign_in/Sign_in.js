@@ -1,4 +1,4 @@
-import { Button, Checkbox, Form, Message} from 'semantic-ui-react';
+import { Button, Form, Message} from 'semantic-ui-react';
 import React, { Component } from 'react';
 import styles from './Sign_in.module.scss';
 import { authentication } from '../Utils/Firebase/firebase';
@@ -24,8 +24,6 @@ class UserAuthentication extends Component {
       this.props.history.push('/CreateListing');
     }).catch((error)=> {
     // Handle Errors here.
-    var errorCode = error.code;
-    var errorMessage = error.message;
     this.setState({error:true, errorMsg: error.message});
     console.log(error.message);
     // ...
@@ -38,8 +36,6 @@ class UserAuthentication extends Component {
       this.props.history.push('/CreateListing');
     }).catch((error)=> {
     // Handle Errors here.
-    var errorCode = error.code;
-    var errorMessage = error.message;
     this.setState({error:true, errorMsg: error.message});
     console.log(error.message);
     // ...

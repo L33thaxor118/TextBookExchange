@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import {BrowserRouter as Router, Route, Switch, Link, Redirect} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 import UserAuthentication from './Sign_in/Sign_in';
 import CreateListing from './CreateListing/CreateListing';
-import logo from './logo.svg';
 import './App.css';
 import 'semantic-ui-css/semantic.css';
 import { authentication } from './Utils/Firebase/firebase';
