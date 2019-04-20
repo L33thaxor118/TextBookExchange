@@ -15,10 +15,6 @@ const ProtectedRoute = ({ component: Component, ...rest }) => (
    )} />
 );
 
-// Include new Components here
-// import Home from './Home/Home'
-import Search from './Search';
-import UserAuthentication from './Sign_in';
 
 // Currently displays Sign_in and Search components for testing purposes
 class App extends Component {
