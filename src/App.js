@@ -9,12 +9,20 @@ import { authentication } from './Utils/Firebase/firebase';
 //Source for ProtectedRoute:
 //https://medium.com/@leonardobrunolima/react-tips-how-to-protect-routes-for-unauthorized-access-with-react-router-v4-73c0d451e0a2
 const ProtectedRoute = ({ component: Component, ...rest }) => (
-   <Route {...rest} render={(props) => (
+   <Route {...rest} render={props => (
       authentication.currentUser != null ?
-         <Component {...props} /> : <Redirect to={{ pathname: process.env.PUBLIC_URL + '/', state: { from: props.location }}} />
+        <Component {...props} /> : (
+          <Redirect
+            to={{
+              pathname: '/',
+              state: {
+                from: props.location
+              }
+            }}
+          />
+        )
    )} />
 );
-
 
 // Currently displays Sign_in and Search components for testing purposes
 class App extends Component {
@@ -23,8 +31,8 @@ class App extends Component {
       <Router>
         <div className="pageContainer">
           <Switch>
-            <Route exact path={process.env.PUBLIC_URL + '/'} component={UserAuthentication}/>
-            <ProtectedRoute exact path={process.env.PUBLIC_URL + '/CreateListing'} component={CreateListing}/>
+            <Route exact path='/' component={UserAuthentication}/>
+            <ProtectedRoute exact path='/listings/new' component={CreateListing}/>
           </Switch>
         </div>
       </Router>
