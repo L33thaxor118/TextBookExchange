@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { Button, Form, Message } from 'semantic-ui-react';
-import styles from './SignIn.module.scss';
+import { Button, Form, Message, Card } from 'semantic-ui-react';
+
 import { authentication } from '../Utils/Firebase/firebase';
+import styles from './SignIn.module.scss';
+import { ErrorContainer } from './SignIn.styled';
 
 class UserAuthentication extends Component {
   state = {
@@ -39,23 +41,49 @@ class UserAuthentication extends Component {
   render() {
     return (
       <div className={styles.container}>
-        <Form>
-          <Form.Field>
-            <label>Email</label>
-            <input placeholder='email' onChange={this.onFormFieldChange('email')}/>
-          </Form.Field>
-          <Form.Field>
-            <label>Password</label>
-            <input
-              type='password'
-              placeholder='password'
-              onChange={this.onFormFieldChange('password')}
-            />
-          </Form.Field>
-          <Button type='submit' onClick={this.signInHandler.bind(this)}>Sign in</Button>
-          <Button type='submit' onClick={this.signUpHandler.bind(this)}>Register</Button>
-          {this.state.error && <Message header='Action forbidden' content={this.state.error} />}
-        </Form>
+        <Card>
+          <Card.Content>
+            <Card.Header>Sign In</Card.Header>
+            <Card.Description>
+              <Form>
+                <Form.Field>
+                  <label>Email</label>
+                  <input onChange={this.onFormFieldChange('email')}/>
+                </Form.Field>
+                <Form.Field>
+                  <label>Password</label>
+                  <input
+                    type='password'
+                    onChange={this.onFormFieldChange('password')}
+                  />
+                </Form.Field>
+                <Button
+                  primary
+                  type='submit'
+                  onClick={this.signInHandler.bind(this)}
+                >
+                  Sign In
+                </Button>
+                <Button
+                  basic
+                  type='submit'
+                  onClick={this.signUpHandler.bind(this)}
+                >
+                  Register
+                </Button>
+              </Form>
+            </Card.Description>
+          </Card.Content>
+          {this.state.error && (
+            <ErrorContainer>
+              <Message
+                color='red'
+                header='Error'
+                content={this.state.error}
+              />
+            </ErrorContainer>
+          )}
+        </Card>
       </div>
     );
   }
