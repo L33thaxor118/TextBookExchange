@@ -1,87 +1,64 @@
-import { Button, Form, Message} from 'semantic-ui-react';
 import React, { Component } from 'react';
-import styles from './Sign_in.module.scss';
+import { Button, Form, Message } from 'semantic-ui-react';
+import styles from './SignIn.module.scss';
 import { authentication } from '../Utils/Firebase/firebase';
 
 class UserAuthentication extends Component {
-  constructor() {
-    super();
-    this.state = {
-      email: "",
-      password: "",
-      error: false,
-      errorMsg: ""
-    };
-    this.errorMessage = '';
-    this.signUpHandler = this.signUpHandler.bind(this);
-    this.signInHandler = this.signInHandler.bind(this);
-    this.emailInputChanged = this.emailInputChanged.bind(this);
-    this.passwordInputChanged = this.passwordInputChanged.bind(this);
+  state = {
+    email: '',
+    password: '',
+    error: null,
+  };
+
+  // TODO: Move all of this into a Redux reducer
+  async signUpHandler() {
+    try {
+      const { email, password } = this.state;
+      const { user } = await authentication.createUserWithEmailAndPassword(email, password);
+      console.log('created user', user);
+      this.props.history.push('/');
+    } catch (error) {
+      this.setState({ error: error.message || 'An unknown error occurred' });
+    }
   }
 
-  signUpHandler() {
-    authentication.createUserWithEmailAndPassword(this.state.email, this.state.password).then(function(user){
-      this.props.history.push('/CreateListing');
-    }).catch((error)=> {
-    // Handle Errors here.
-    this.setState({error:true, errorMsg: error.message});
-    console.log(error.message);
-    // ...
-    });
+  async signInHandler() {
+    try {
+      const { email, password } = this.state;
+      const { user } = await authentication.signInWithEmailAndPassword(email, password);
+      console.log('user is', user);
+    } catch (error) {
+      this.setState({ error: error.message || 'An unknown error occurred' });
+    }
   }
 
-  signInHandler() {
-    authentication.signInWithEmailAndPassword(this.state.email, this.state.password).then((user)=>{
-      console.log("success");
-      this.props.history.push('/CreateListing');
-    }).catch((error)=> {
-    // Handle Errors here.
-    this.setState({error:true, errorMsg: error.message});
-    console.log(error.message);
-    // ...
-    });
-  }
-
-  emailInputChanged(event) {
-    this.setState( {
-      email: event.target.value
-    });
-  }
-
-  passwordInputChanged(event) {
-    this.setState( {
-      password: event.target.value
-    });
-  }
-
+  onFormFieldChange = fieldName => event => this.setState({
+    [fieldName]: event.target.value
+  });
 
   render() {
-    var errorMessage = (  <Message
-        header='Action Forbidden'
-        content={this.state.errorMsg}
-      />);
-
     return (
       <div className={styles.container}>
         <Form>
           <Form.Field>
-            <label>email</label>
-            <input placeholder='email' onChange={this.emailInputChanged}/>
+            <label>Email</label>
+            <input placeholder='email' onChange={this.onFormFieldChange('email')}/>
           </Form.Field>
           <Form.Field>
             <label>Password</label>
-            <input type= 'password' placeholder='password' onChange={this.passwordInputChanged}/>
+            <input
+              type='password'
+              placeholder='password'
+              onChange={this.onFormFieldChange('password')}
+            />
           </Form.Field>
-          <Button type='submit' onClick={this.signUpHandler}>Sign Up</Button>
-          <Button type='submit' onClick={this.signInHandler}>Sign In</Button>
-          {this.state.error ? errorMessage : null}
+          <Button type='submit' onClick={this.signInHandler.bind(this)}>Sign in</Button>
+          <Button type='submit' onClick={this.signUpHandler.bind(this)}>Register</Button>
+          {this.state.error && <Message header='Action forbidden' content={this.state.error} />}
         </Form>
       </div>
     );
   }
-
-
-
 }
 
 export default UserAuthentication;
