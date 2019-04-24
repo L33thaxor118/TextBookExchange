@@ -16,7 +16,7 @@ const ProtectedRoute = ({ component: Component, ...rest }) => (
         <Component {...props} /> : (
           <Redirect
             to={{
-              pathname: '/',
+              pathname: '/login',
               state: {
                 from: props.location
               }
@@ -31,9 +31,9 @@ class App extends Component {
   render() {
     return (
       <Router>
-        <div className="pageContainer">
+        <div className='pageContainer'>
           <Switch>
-            <Route exact path='/' component={UserAuthentication}/>
+            <Route exact path='/login' component={UserAuthentication}/>
             <ProtectedRoute exact path='/listings/new' component={CreateListing}/>
           </Switch>
         </div>
