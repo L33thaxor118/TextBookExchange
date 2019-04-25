@@ -8,27 +8,27 @@ import { ErrorContainer } from './SignIn.styled';
 class UserAuthentication extends Component {
   state = {
     email: '',
+    displayName: '',
     password: '',
     error: null,
+    isRegisterScreen: false,
+  };
+
+  redirectToPreviousPage = () => {
+    const { from } = this.props.location.state || {};
+
+    this.props.history.push(from || '/');
   };
 
   // TODO: Move all of this into a Redux reducer
-  async signUpHandler() {
+  async handleFormSubmit() {
+    const { isRegisterScreen } = this.state;
     try {
+      const authMethod = (isRegisterScreen ? 'createUser' : 'signIn') + 'WithEmailAndPassword';
       const { email, password } = this.state;
-      const { user } = await authentication.createUserWithEmailAndPassword(email, password);
-      console.log('created user', user);
-      this.props.history.push('/');
-    } catch (error) {
-      this.setState({ error: error.message || 'An unknown error occurred' });
-    }
-  }
-
-  async signInHandler() {
-    try {
-      const { email, password } = this.state;
-      const { user } = await authentication.signInWithEmailAndPassword(email, password);
+      const { user } = await authentication[authMethod](email, password);
       console.log('user is', user);
+      this.redirectToPreviousPage();
     } catch (error) {
       this.setState({ error: error.message || 'An unknown error occurred' });
     }
@@ -38,18 +38,32 @@ class UserAuthentication extends Component {
     [fieldName]: event.target.value
   });
 
+  toggleScreenType = isRegisterScreen => () => this.setState({
+    isRegisterScreen,
+    error: null
+  });
+
   render() {
+    const { error, isRegisterScreen } = this.state;
+    const actionName = isRegisterScreen ? 'Register' : 'Sign In';
+
     return (
       <div className={styles.container}>
         <Card>
           <Card.Content>
-            <Card.Header>Sign In</Card.Header>
+            <Card.Header>{actionName}</Card.Header>
             <Card.Description>
               <Form>
                 <Form.Field>
                   <label>Email</label>
                   <input onChange={this.onFormFieldChange('email')}/>
                 </Form.Field>
+                {isRegisterScreen && (
+                  <Form.Field>
+                    <label>Display name</label>
+                    <input onChange={this.onFormFieldChange('displayName')} />
+                  </Form.Field>
+                )}
                 <Form.Field>
                   <label>Password</label>
                   <input
@@ -60,26 +74,30 @@ class UserAuthentication extends Component {
                 <Button
                   primary
                   type='submit'
-                  onClick={this.signInHandler.bind(this)}
+                  onClick={this.handleFormSubmit.bind(this)}
                 >
-                  Sign In
-                </Button>
-                <Button
-                  basic
-                  type='submit'
-                  onClick={this.signUpHandler.bind(this)}
-                >
-                  Register
+                  {actionName}
                 </Button>
               </Form>
             </Card.Description>
           </Card.Content>
-          {this.state.error && (
+          <Card.Content style={{userSelect: 'none'}} extra>
+            {isRegisterScreen ? (
+              <div>
+                Already have an account? <a onClick={this.toggleScreenType(false)}>Sign in</a>.
+              </div>
+            ) : (
+              <div>
+                Don't have an account? <a onClick={this.toggleScreenType(true)}>Register</a> now.
+              </div>
+            )}
+          </Card.Content>
+          {error && (
             <ErrorContainer>
               <Message
                 color='red'
                 header='Error'
-                content={this.state.error}
+                content={error}
               />
             </ErrorContainer>
           )}

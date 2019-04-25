@@ -20,7 +20,7 @@ const ProtectedRoute = ({ component: Component, currentUser, ...rest }) => (
               to={{
                 pathname: '/login',
                 state: {
-                  from: props.location
+                  from: props.location.pathname
                 }
               }}
             />
