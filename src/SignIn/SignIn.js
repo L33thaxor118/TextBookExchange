@@ -3,7 +3,7 @@ import { Button, Form, Message, Card } from 'semantic-ui-react';
 
 import { authentication } from '../Utils/Firebase/firebase';
 import styles from './SignIn.module.scss';
-import { ErrorContainer } from './SignIn.styled';
+import { ErrorContainer, ToggleLink } from './SignIn.styled';
 
 class UserAuthentication extends Component {
   state = {
@@ -84,11 +84,11 @@ class UserAuthentication extends Component {
           <Card.Content style={{userSelect: 'none'}} extra>
             {isRegisterScreen ? (
               <div>
-                Already have an account? <a onClick={this.toggleScreenType(false)}>Sign in</a>.
+                Already have an account? <ToggleLink onClick={this.toggleScreenType(false)}>Sign in</ToggleLink>.
               </div>
             ) : (
               <div>
-                Don't have an account? <a onClick={this.toggleScreenType(true)}>Register</a> now.
+                Don't have an account? <ToggleLink onClick={this.toggleScreenType(true)}>Register</ToggleLink> now.
               </div>
             )}
           </Card.Content>
