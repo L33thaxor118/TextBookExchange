@@ -7,3 +7,12 @@
   flex-direction: row;
   justify-content: space-around;
 }
+
+.bookSelection {
+  display: flex;
+  flex-direction: row;
+  div {
+    margin-left: 5%;
+    margin-right: 5%;
+  }
+}

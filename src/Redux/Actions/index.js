@@ -1,19 +1,42 @@
-import { todosRef } from "../Firebase/firebase";
-import { FETCH_TODOS } from "./types";
+import { SET_CURRENT_USER, CREATE_LISTING, GET_BOOKS } from "./types";
+import axios from 'axios';
 
-export const addToDo = newToDo => async dispatch => {
-  todosRef.push().set(newToDo);
-};
 
-export const completeToDo = completeToDoId => async dispatch => {
-  todosRef.child(completeToDoId).remove();
-};
-
-export const fetchToDos = () => async dispatch => {
-  todosRef.on("value", snapshot => {
-    dispatch({
-      type: FETCH_TODOS,
-      payload: snapshot.val()
+export function get_books() {
+  return (dispatch) => {
+    axios.get('https://uofi-book-exchange-backend.herokuapp.com/books')
+    .then(response=> {
+      dispatch(get_books_success(response.data.books));
+    }).catch(error=> {
+      dispatch(get_books_failure(true));
     });
-  });
-};
+  };
+}
+
+export function create_book(book) {
+  return (dispatch) => {
+    axios.post('https://uofi-book-exchange-backend.herokuapp.com/books', book)
+    .then(response=> {
+      console.log(response);
+      dispatch(post_book_success(response.data));
+    }).catch(error=> {
+      dispatch(post_book_failure(true));
+    });
+  };
+}
+
+export function get_books_success(books) {
+  return {
+    type: GET_BOOKS.SUCCESS,
+    books
+  };
+}
+
+export function get_books_failure(bool) {
+  return {
+    type: GET_BOOKS.FAILURE,
+    hasErrored: bool
+  };
+}
+
+//in component: dispatch an action
