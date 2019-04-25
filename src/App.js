@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 
+// Route components
 import UserAuthentication from './SignIn';
 import CreateListing from './CreateListing';
+import ListingDetails from './ListingDetails';
 
+// Stylesheets
 import './App.css';
 import 'semantic-ui-css/semantic.css';
+
+// Utils
 import { authentication } from './Utils/Firebase/firebase';
 
 //Source for ProtectedRoute:
@@ -31,11 +36,11 @@ const ProtectedRoute = ({ component: Component, currentUser, ...rest }) => (
   </>
 );
 
-// Currently displays Sign_in and Search components for testing purposes
 class App extends Component {
   state = {};
 
   async componentDidMount() {
+    // TODO: move this to Redux
     authentication.onAuthStateChanged(user => this.setState({ user }))
   }
 
@@ -51,6 +56,7 @@ class App extends Component {
               component={CreateListing}
               currentUser={this.state.user}
             />
+            <ProtectedRoute path='/listings/:id' component={ListingDetails} currentUser={this.state.user} />
           </Switch>
         </div>
       </Router>
