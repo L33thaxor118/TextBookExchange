@@ -20,7 +20,10 @@ const listingsApi = {
       params: listing
     });
   },
-  update: (listing = {}) => makeListingsRequest({ method: 'PUT', params: listing }),
+  update: (options = {}) => {
+    const { id, ...listing } = options;
+    return makeListingsRequest({ method: 'PUT', params: listing, id });
+  },
   delete: id => makeListingsRequest({ method: 'DELETE', id }),
 };
 

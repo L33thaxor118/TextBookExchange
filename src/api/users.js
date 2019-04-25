@@ -20,7 +20,10 @@ const usersApi = {
       params: user
     });
   },
-  update: (user = {}) => makeUsersRequest({ method: 'PUT', params: user }),
+  update: (options = {}) => {
+    const { id, ...user } = options;
+    return makeUsersRequest({ method: 'PUT', params: user, id });
+  },
   delete: id => makeUsersRequest({ method: 'DELETE', id }),
 };
 
