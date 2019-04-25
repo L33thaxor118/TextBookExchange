@@ -11,3 +11,10 @@ export const ErrorContainer = styled(Card.Content).attrs({extra: true})`
     }
   }
 `;
+
+export const ToggleLink = styled.span`
+  &:hover {
+    color: #1e70bf;
+    cursor: pointer;
+  }
+`;
