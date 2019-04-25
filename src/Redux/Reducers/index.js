@@ -1,8 +1,14 @@
 import { combineReducers } from "redux";
 
-import {booksSuccess, booksHasFailed } from "./dataReducer";
+import {books, getBooksHasFailed, createBookHasFailed, listings, getListingsHasFailed,
+  createListingHasFailed, createTradeBookHasFailed} from "./dataReducer";
 
 export default combineReducers({
-  books: booksSuccess,
-  booksError: booksHasFailed
+  books,
+  getBooksHasFailed,
+  createBookHasFailed,
+
+  listings,
+  getListingsHasFailed,
+  createListingHasFailed
 });

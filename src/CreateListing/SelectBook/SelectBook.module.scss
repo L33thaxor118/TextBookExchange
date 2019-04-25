@@ -1,0 +1,33 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  h1 {
+    align-self: center;
+    margin-left: 3%;
+    margin-right: 3%;
+  }
+}
+
+.dropdownContainer {
+  display: flex;
+  flex-direction: column;
+  .dropdown{
+    position: absolute;
+  }
+  h2 {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+}
+
+.createBookForm {
+  display: flex;
+  flex-direction: column;
+  .input {
+    position: relative;
+  }
+  h2 {
+    text-align: center;
+  }
+}

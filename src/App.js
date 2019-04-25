@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 
-// Route components
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faExchangeAlt } from '@fortawesome/free-solid-svg-icons'
 import UserAuthentication from './SignIn';
 import CreateListing from './CreateListing';
 import ListingDetails from './ListingDetails';
@@ -13,6 +15,8 @@ import 'semantic-ui-css/semantic.css';
 
 // Utils
 import { authentication } from './Utils/Firebase/firebase';
+
+library.add(faExchangeAlt);
 
 //Source for ProtectedRoute:
 //https://medium.com/@leonardobrunolima/react-tips-how-to-protect-routes-for-unauthorized-access-with-react-router-v4-73c0d451e0a2
