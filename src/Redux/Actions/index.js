@@ -63,13 +63,14 @@ export function post_book_failure(bool) {
 
 
 
-export function post_listing(listing) {
+export function post_listing(newListing) {
   return async (dispatch) => {
     try {
-      let { newListing } = await listingsApi.create(listing);
+      let { listing } = await listingsApi.create(newListing);
       console.log("successfuly created new Listing");
-      console.log(newListing);
+      console.log(listing);
       dispatch(post_listing_success(listing));
+      return listing;
     } catch(err) {
       console.log(err);
       console.log("failed to create new Listing");

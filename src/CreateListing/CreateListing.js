@@ -8,9 +8,9 @@ import styles from './CreateListing.module.scss';
 import UploadComponent from './UploadComponent/UploadComponent';
 import PhotoUploadPreview from './PhotoUploadPreview/PhotoUploadPreview';
 import SelectBook from './SelectBook/SelectBook'
-import { storage, authentication } from '../Utils/Firebase/firebase'
+import { storage, authentication, uploadPhotos, fetchPhotoUrls } from '../Utils/Firebase/firebase'
 import { connect } from 'react-redux';
-import { get_books, post_book, post_book_failure, post_listing } from '../Redux/Actions/index';
+import { get_books, post_book, post_book_failure, post_listing} from '../Redux/Actions/index';
 
 const lookupBookByISBN = isbn => axios.get('https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn).then(({ data }) => data);
 
@@ -116,12 +116,11 @@ class CreateListing extends Component {
   }
 
 async handleCreate() {
-
     let newListing = this.state.newListing;
     if (this.state.isbnNotFound && !this.state.selectedFromDropdown) return;
     if (this.state.tradeIsbnNotFound && !this.state.selectedFromDropdownTrade) return;
-
     this.props.setBookCreateFailure(false);
+
     if (!this.state.selectedFromDropdown) {
       let book = {};
       book = this.checkIfBookExists(this.state.newBookFormISBN);
@@ -142,15 +141,9 @@ async handleCreate() {
     newListing.imageNames = this.state.imageFileList.map(file => (file.name));
     console.log(newListing);
     delete newListing.title;
-    let createdListing = this.props.createListing(newListing);
-    var storageRef = storage.ref();
-    for (let i = 0; i < this.state.imageFileList.length; i++) {
-      let imageFile = this.state.imageFileList[i];
-      var imgref = storageRef.child(createdListing._id + '/' + imageFile.name);
-      imgref.put(imageFile).then(function(snapshot) {
-        console.log('Uploaded a blob or file!');
-      }).catch(function(error){console.log(error.message)});
-    }
+    let createdListing = await this.props.createListing(newListing);
+    if (createdListing != undefined) await uploadPhotos(createdListing._id, this.state.imageFileList);
+    console.log(await fetchPhotoUrls(createdListing._id, createdListing.imageNames));
   }
 
   tradeBookSelected(event, data) {
@@ -204,7 +197,6 @@ async handleCreate() {
     try {
       let response = await lookupBookByISBN(event.target.value);
       let notFound = false;
-      console.log(response);
       if (response.totalItems < 1) notFound = true;
       this.setState({
         isbnLoading: false,
@@ -218,7 +210,6 @@ async handleCreate() {
     }
   }
 
-
   async createTradeBookFormISBNChanged(event) {
     this.setState({
       newTradeBookFormISBN: event.target.value,
@@ -228,7 +219,6 @@ async handleCreate() {
     try {
       let response = await lookupBookByISBN(event.target.value);
       let notFound = false;
-      console.log(response);
       if (response.totalItems < 1) notFound = true;
       this.setState({
         tradeIsbnLoading: false,
@@ -338,7 +328,7 @@ async handleCreate() {
                 <p>FAILED TO CREATE LISTING</p>
               </Modal.Description>
             </Modal.Content>
-          </Modal>
+        </Modal>
 
       </div>
     );
