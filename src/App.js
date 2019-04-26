@@ -5,6 +5,7 @@ import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom
 import UserAuthentication from './SignIn';
 import CreateListing from './CreateListing';
 import ListingDetails from './ListingDetails';
+import Search from './Search';
 
 // Stylesheets
 import './App.css';
@@ -50,6 +51,7 @@ class App extends Component {
         <div className='pageContainer'>
           <Switch>
             <Route exact path='/login' component={UserAuthentication}/>
+            <ProtectedRoute exact path='/listings' component={Search} currentUser={this.state.user} />
             <ProtectedRoute
               exact
               path='/listings/new'
