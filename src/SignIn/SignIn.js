@@ -5,6 +5,8 @@ import { authentication } from '../Utils/Firebase/firebase';
 import styles from './SignIn.module.scss';
 import { ErrorContainer, ToggleLink } from './SignIn.styled';
 
+import usersApi from '../api/users';
+
 class UserAuthentication extends Component {
   state = {
     email: '',
@@ -25,9 +27,17 @@ class UserAuthentication extends Component {
     const { isRegisterScreen } = this.state;
     try {
       const authMethod = (isRegisterScreen ? 'createUser' : 'signIn') + 'WithEmailAndPassword';
-      const { email, password } = this.state;
+      const { email, password, displayName } = this.state;
       const { user } = await authentication[authMethod](email, password);
-      console.log('user is', user);
+      
+      if (user && isRegisterScreen) {
+        await usersApi.create({
+          firebaseId: user.uid,
+          displayName,
+          email,
+        });
+      }
+
       this.redirectToPreviousPage();
     } catch (error) {
       this.setState({ error: error.message || 'An unknown error occurred' });
