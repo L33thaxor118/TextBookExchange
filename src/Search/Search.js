@@ -41,7 +41,7 @@ class Search extends Component {
 
   // Filter array items based on search criteria (title)
   // Fuzzy search over book title AND authors
-  filterListings = query => this.fuse.search(query);
+  filterListings = query => this.fuse && this.fuse.search(query);
 
   // redraws component on state change
   handleInputChange = event => {
@@ -83,7 +83,7 @@ class Search extends Component {
         </Menu>
         <Segment attached='bottom'>
           <ul>
-            {results.map((item, i) => <span key={i}>{item.book.title}</span>)}
+            {results.map((item, i) => <div key={i}>{item.book.title}</div>)}
           </ul>
         </Segment>
       </SearchContainer>
