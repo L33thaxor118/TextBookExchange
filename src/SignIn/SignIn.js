@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Button, Form, Message, Card } from 'semantic-ui-react';
 
 import { authentication } from '../Utils/Firebase/firebase';
-import styles from './SignIn.module.scss';
+import styles from './SignIn.css';
 import { ErrorContainer, ToggleLink } from './SignIn.styled';
 
 import usersApi from '../api/users';
