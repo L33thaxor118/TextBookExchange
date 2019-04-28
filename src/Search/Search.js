@@ -41,7 +41,7 @@ class Search extends Component {
 
   // Filter array items based on search criteria (title)
   // Fuzzy search over book title AND authors
-  filterListings = query => this.fuse && this.fuse.search(query);
+  filterListings = query => this.fuse ? this.fuse.search(query) : [];
 
   // redraws component on state change
   handleInputChange = event => {
