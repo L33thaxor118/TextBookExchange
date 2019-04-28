@@ -3,7 +3,7 @@ import { makeRequest } from '.';
 const makeUsersRequest = (options = {}) => makeRequest({...options, endpoint: '/users'});
 
 const getUserById = id => makeUsersRequest({ method: 'GET', id });
-const getAllUser = () => makeUsersRequest({ method: 'GET' });
+const getAllUsers = () => makeUsersRequest({ method: 'GET' });
 
 const usersApi = {
   get(options = {}) {

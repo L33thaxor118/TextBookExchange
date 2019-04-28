@@ -1,6 +1,6 @@
 import { Button, Form } from 'semantic-ui-react';
 import React, { Component } from 'react';
-import styles from './CreateListing.module.scss';
+import styles from './CreateListing.css';
 import UploadComponent from './UploadComponent/UploadComponent';
 import PhotoUploadPreview from './PhotoUploadPreview/PhotoUploadPreview';
 import { storage } from '../Utils/Firebase/firebase'

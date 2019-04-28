@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import styles from './PhotoUploadPreview.module.scss';
+import styles from './PhotoUploadPreview.css';
 
 class PhotoUploadPreview extends Component {
   constructor() {
