@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExchangeAlt } from '@fortawesome/free-solid-svg-icons'
 import UserAuthentication from './SignIn';
 import CreateListing from './CreateListing';
@@ -12,9 +11,7 @@ import Search from './Search';
 // Stylesheets
 import './App.css';
 import 'semantic-ui-css/semantic.css';
-
-// Utils
-import { authentication } from './Utils/Firebase/firebase';
+import { authentication } from './utils/firebase';
 
 library.add(faExchangeAlt);
 

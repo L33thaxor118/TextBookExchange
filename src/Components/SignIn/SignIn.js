@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { Button, Form, Message, Card } from 'semantic-ui-react';
 
-import { authentication } from '../Utils/Firebase/firebase';
 import styles from './SignIn.css';
 import { ErrorContainer, ToggleLink } from './SignIn.styled';
 
 import usersApi from '../api/users';
+import { authentication } from '../../utils/firebase';
 
 class UserAuthentication extends Component {
   state = {

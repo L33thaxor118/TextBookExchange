@@ -1,12 +1,8 @@
 import React, { Component } from 'react';
 import { Dropdown, Message, Input } from 'semantic-ui-react';
-import axios from 'axios';
 import styles from './SelectBook.module.scss';
 
 class SelectBook extends Component {
-  constructor() {
-    super();
-  }
 
   render() {
     return (

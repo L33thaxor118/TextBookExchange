@@ -1,5 +1,4 @@
-import { SET_CURRENT_USER, CREATE_LISTING, GET_BOOKS, CREATE_BOOK, GET_LISTINGS} from "./types";
-import axios from 'axios';
+import { CREATE_LISTING, GET_BOOKS, CREATE_BOOK, GET_LISTINGS} from "./types";
 import booksApi from '../../api/books';
 import listingsApi from '../../api/listings';
 

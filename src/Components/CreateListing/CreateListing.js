@@ -1,4 +1,4 @@
-import { Button, Form, Header, TextArea,  Dropdown, Message, Modal} from 'semantic-ui-react';
+import { Button, Form, Dropdown, Modal} from 'semantic-ui-react';
 import React, { Component } from 'react';
 import styles from './CreateListing.css';
 
@@ -8,9 +8,9 @@ import styles from './CreateListing.module.scss';
 import UploadComponent from './UploadComponent/UploadComponent';
 import PhotoUploadPreview from './PhotoUploadPreview/PhotoUploadPreview';
 import SelectBook from './SelectBook/SelectBook'
-import { storage, authentication, uploadPhotos, fetchPhotoUrls } from '../Utils/Firebase/firebase'
+import { authentication, uploadPhotos, fetchPhotoUrls } from '../../utils/firebase'
 import { connect } from 'react-redux';
-import { get_books, post_book, post_book_failure, post_listing} from '../Redux/Actions/index';
+import { get_books, post_book, post_book_failure, post_listing} from '../../redux/actions/index';
 
 const lookupBookByISBN = isbn => axios.get('https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn).then(({ data }) => data);
 
@@ -24,20 +24,6 @@ const conditionOptions = [
 
 function createObjectURL(object) {
     return (window.URL) ? window.URL.createObjectURL(object) : window.webkitURL.createObjectURL(object);
-}
-
-function setupDropdownObjects(books) {
-  var objs = [];
-  objs.push({key: "no_select", text: "Enter your own", value: "None" })
-  for (let i = 0; i < books.length; i++) {
-    var obj = {
-      key: books[i].isbn,
-      text: books[i].title,
-      value: books[i]._id
-    }
-    objs.push(obj);
-  }
-  return objs;
 }
 // function revokeObjectURL(url) {
 //     return (window.URL) ? window.URL.revokeObjectURL(url) : window.webkitURL.revokeObjectURL(url);
@@ -79,7 +65,6 @@ class CreateListing extends Component {
   componentDidMount() {
     if (this.props.listing != null) {
       console.log("modify mode")
-      this.state.newListing = this.props.listing;
     }
     this.props.getData();
     const user = authentication.currentUser
@@ -91,8 +76,7 @@ class CreateListing extends Component {
       condition: "",
       price: 0,
       exchangeBook: "",
-      userId: user == null ? null : user.uid,
-      description: ""
+      userId: user == null ? null : user.uid
     }
     this.setState({
       books: this.props.books,
@@ -110,7 +94,7 @@ class CreateListing extends Component {
 
   checkIfBookExists(isbn) {
     for (let i = 0; i < this.props.books.length; i++) {
-      if (this.props.books[i].isbn == isbn) return this.props.books[i];
+      if (this.props.books[i].isbn === isbn) return this.props.books[i];
     }
     return null;
   }
@@ -142,7 +126,7 @@ async handleCreate() {
     console.log(newListing);
     delete newListing.title;
     let createdListing = await this.props.createListing(newListing);
-    if (createdListing != undefined) await uploadPhotos(createdListing._id, this.state.imageFileList);
+    if (createdListing !== undefined) await uploadPhotos(createdListing._id, this.state.imageFileList);
     console.log(await fetchPhotoUrls(createdListing._id, createdListing.imageNames));
   }
 
@@ -150,13 +134,12 @@ async handleCreate() {
     const { value } = data;
     const updatedListing = this.state.newListing;
     updatedListing.exchangeBook = "";
-    if (value == "None") {
+    if (value === "None") {
       this.setState({
         newListing: updatedListing,
         selectedFromDropdownTrade: false
       })
     } else {
-      const { text } = data.options.find(o => o.value === value);
       const updatedListing = this.state.newListing;
       updatedListing.exchangeBook = value;
       this.setState({
@@ -171,7 +154,7 @@ async handleCreate() {
     const updatedListing = this.state.newListing;
     updatedListing.bookId = "";
     updatedListing.title = "";
-    if (value == "None") {
+    if (value === "None") {
       this.setState({
         newListing: updatedListing,
         selectedFromDropdown: false

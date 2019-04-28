@@ -1,4 +1,4 @@
-import { SET_CURRENT_USER, CREATE_LISTING, GET_LISTINGS, GET_BOOKS, CREATE_BOOK} from "../Actions/types";
+import { CREATE_LISTING, GET_LISTINGS, GET_BOOKS, CREATE_BOOK} from "../actions/types";
 
 
 export function books(state = [], action) {
