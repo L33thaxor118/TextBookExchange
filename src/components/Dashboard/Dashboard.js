@@ -1,4 +1,4 @@
-import { Button, List, Image, Icon } from 'semantic-ui-react';
+import { Button, List, Image, Icon, Header } from 'semantic-ui-react';
 import React, { Component } from 'react';
 
 //import styles from './Dashboard.scss';
@@ -12,7 +12,6 @@ class Dashboard extends Component {
 		this.state = {
 			listingIds: [],
 			user: [],
-			name:null,
 			listings:[],
 			photoUrls:[],
 			image: 'https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png'
@@ -23,65 +22,84 @@ class Dashboard extends Component {
 	async componentDidMount() {
 		const id = authentication.currentUser.uid; // log into firebase to get user test w 100
 		const userObj = await usersApi.get({id});
-		const listingIds = userObj.user.listings
-		//console.log(userObj.user.listings);
+		const listingIds = userObj.user.listings;
 		this.setState({
-			listingIds,
-			name: userObj.user.displayName,
 			user:id
 		});
 
 		await Promise.all(listingIds.map(async (id) => {
     		const listingObj = await listingsApi.get({id});
-    		console.log(listingObj.listing);
     		this.setState({
-				listings: [...this.state.listings, listingObj.listing]
+				listings: [...this.state.listings, listingObj.listing],
+				listingIds: [...this.state.listingIds, id]
 			});
   		}));
 
 		await Promise.all(this.state.listings.map(async (listing) => {
     		const photoUrls = await fetchPhotoUrls(listing._id, listing.imageNames);
-    		console.log(photoUrls)
+    		if (photoUrls.length===0) {
+    			var photoUrl = 'https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png';
+    		}
+    		else {
+    			photoUrl = photoUrls[0];
+    		}
     		this.setState({
-				photoUrls: [...this.state.photoUrls, photoUrls]
+				photoUrls: [...this.state.photoUrls, photoUrl]
 			});
   		}));
 	}
 
-	async handleDeleteListing() {
+	async handleDeleteListing(id) {
+		const deletedListing = await listingsApi.delete({id});
+		// not needed after redux adaptation (?) :
+		if (deletedListing) {
+			const listingIndex = this.state.listingIds.indexOf(id);
+			console.log(listingIndex);
+	    	const newListingIds = [].concat(this.state.listingIds);
+	    	newListingIds.splice(listingIndex, 1);
+	    	const newListings = [].concat(this.state.listings);
+	    	newListings.splice(listingIndex, 1);
+	    	this.setState({listingIds:newListingIds, listings: newListings}); 
+    	}
 
 	}
-
+	async navigateToListingEdit(id) {
+		// change to listing edit when view created, now going to listings details
+		this.props.history.push(`/listings/${id}`);
+	}
 	render () {
 		return (
 			<div>
-			{this.state.name} Dashboard 
+			<Header as='h2' textAlign='center'>Your Dashboard </Header>
+			
 			{(this.state.listings)?
 				<div>
-				 <List>
+				 <List celled>
 				 		{this.state.listings.map((listing, index) => {
 	    				    return (<List.Item>
-						      <Image src={this.state.image} size='tiny'/>
+						      <Image src={this.state.photoUrls[index]} size='tiny'/>
 						      <List.Content>
-						        <List.Header as='a'>{listing.book.title}</List.Header>
+						      <Header as='h4'>{listing.book.title}</Header>
 						        <List.Description>
-						          {listing.description}
+						          Price: {listing.price ? `$${listing.price}` : '—'} <br />
+						          Exchange For: {listing.exchangeBook ? listing.exchangeBook.title : '—'} <br />
 						        </List.Description>
+							      <Button icon labelPosition='left' type='submit' size='tiny' onClick={() => this.navigateToListingEdit(listing._id)}>
+							      	<Icon name='edit' />
+							      	Edit
+							      </Button>
+							      	<Button icon color='red' labelPosition='left' type='submit' size='tiny' onClick={() => this.handleDeleteListing(listing._id)}>
+							      	<Icon name='trash' />
+							      	Delete
+							      </Button>						        
 						      </List.Content>
-						      <Button icon color='blue' labelPosition='left' type='submit' size='small'>
-						      	<Icon name='edit' />
-						      	Edit
-						      </Button>
-						      	<Button icon color='red' labelPosition='left' type='submit' size='small' onClick={this.handleDeleteListing}>
-						      	<Icon name='trash' />
-						      	Delete
-						      </Button>
+
 						    </List.Item>)
 						})
 						}
 					</List>
 				 </div>: 
-				<Button type='submit'>'empty'</Button>
+				{}
         	}
         	</div>
 		)
