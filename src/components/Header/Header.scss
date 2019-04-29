@@ -1,0 +1,54 @@
+#logo {
+    height: 120px;
+    margin-left: 0;
+    padding: 10px;
+}
+
+#navbar {
+    overflow: hidden;
+    padding: 30px 10px; /* Large padding which will shrink on scroll (using JS) */
+    transition: 0.4s; /* Adds a transition effect when the padding is decreased */
+    width: 100%;
+    top: 0; /* At the top */
+    z-index: 99; 
+}
+
+/* Style the navbar links */
+#navbar a {
+    float: left;
+    color: black;
+    text-align: center;
+    padding: 12px;
+    margin-top: 35px;
+    text-decoration: none;
+    font-size: 18px; 
+    line-height: 25px;
+    border-radius: 4px;
+}
+  
+/* Style the active/current link */
+#navbar a.active {
+  background-color: #002058;
+  color: white;
+
+  &:hover {
+    background-color: #ddd;
+    color: black;
+  }
+}
+  
+/* Style the inactive/non-current link */
+#navbar a.inactive {
+  background-color: white;
+  color: black;
+
+  &:hover {
+    background-color: #ddd;
+    color: black;
+  }
+}
+  
+/* Display some links to the right */
+#navbar-right {
+  float: right;
+}

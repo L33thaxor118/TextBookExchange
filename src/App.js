@@ -8,6 +8,8 @@ import CreateListing from './components/CreateListing';
 import ListingDetails from './components/ListingDetails';
 import Search from './components/Search';
 
+import Header from './components/Header';
+
 // Stylesheets
 import './App.css';
 import 'semantic-ui-css/semantic.css';
@@ -49,6 +51,7 @@ class App extends Component {
   render() {
     return (
       <Router>
+        <Header />
         <div className='pageContainer'>
           <Switch>
             <Route exact path='/login' component={UserAuthentication}/>
