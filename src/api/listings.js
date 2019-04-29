@@ -24,7 +24,10 @@ const listingsApi = {
     const { id, ...listing } = options;
     return makeListingsRequest({ method: 'PUT', params: listing, id });
   },
-  delete: id => makeListingsRequest({ method: 'DELETE', id }),
+  delete(options = {}) {
+    const { id } = options;
+    return makeListingsRequest({ method: 'DELETE', id });
+  }
 };
 
 export default listingsApi;

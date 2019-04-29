@@ -8,6 +8,7 @@ import UserAuthentication from './components/SignIn';
 import CreateListing from './components/CreateListing';
 import ListingDetails from './components/ListingDetails';
 import Search from './components/Search';
+import Dashboard from './components/Dashboard';
 
 import Header from './components/Header';
 
