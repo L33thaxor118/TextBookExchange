@@ -8,6 +8,15 @@ export const SearchContainer = styled.div`
   padding-left: 30px;
   padding-right: 30px;
   margin-top: 30px;
+
+  & .segment.bottom {
+    padding: 0px;
+    border: none!important;
+
+    & > .segments {
+      border-radius: 0px;
+    }
+  }
 `;
 
 export const StyledSearch = styled(Input)`

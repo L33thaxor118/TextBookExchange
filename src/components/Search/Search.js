@@ -5,6 +5,8 @@ import React, { Component } from 'react'
 import { Segment, Menu, Icon, Popup } from 'semantic-ui-react';
 import Fuse from 'fuse.js';
 
+import SearchResults from './SearchResults';
+
 import { StyledSearch, CreateListingButton, SearchContainer } from './Search.styled';
 
 import listingsApi from '../../api/listings';
@@ -51,6 +53,8 @@ class Search extends Component {
     });
   };
 
+  navigateToListingDetails = ({ _id }) => this.props.history.push(`/listings/${_id}`);
+
   redirectToCreateListing = () => this.props.history.push('/listings/new');
 
   // render search results with assistance of Suggestion component 
@@ -82,9 +86,10 @@ class Search extends Component {
           </Menu.Menu>
         </Menu>
         <Segment attached='bottom'>
-          <ul>
-            {results.map((item, i) => <div key={i}>{item.book.title}</div>)}
-          </ul>
+          <SearchResults
+            results={results}
+            onItemClick={this.navigateToListingDetails}
+          />
         </Segment>
       </SearchContainer>
     )

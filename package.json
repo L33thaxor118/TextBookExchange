@@ -5,6 +5,7 @@
   "dependencies": {
     "@rebass/grid": "^6.0.0",
     "axios": "^0.18.0",
+    "classnames": "^2.2.6",
     "firebase": "^5.9.4",
     "fuse.js": "^3.4.4",
     "moment": "^2.24.0",
