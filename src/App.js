@@ -55,17 +55,19 @@ class App extends Component {
       <Router>
         <Switch>
           <Route exact path='/login' component={UserAuthentication}/>
-          <div className='pageContainer'>
-            <Header />
-            <ProtectedRoute exact path='/listings' component={Search} currentUser={currentUser} />
-            <ProtectedRoute
-              exact
-              path='/listings/new'
-              component={CreateListing}
-              currentUser={currentUser}
-            />
-            <ProtectedRoute path='/listings/:id' component={ListingDetails} currentUser={currentUser} />
-          </div>
+          <Route>
+            <div className='pageContainer'>
+              <Header />
+              <ProtectedRoute exact path='/listings' component={Search} currentUser={currentUser} />
+              <ProtectedRoute
+                exact
+                path='/listings/new'
+                component={CreateListing}
+                currentUser={currentUser}
+              />
+              <ProtectedRoute path='/listings/:id' component={ListingDetails} currentUser={currentUser} />
+            </div>
+          </Route>
         </Switch>
       </Router>
     ) : null;
