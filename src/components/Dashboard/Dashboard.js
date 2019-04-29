@@ -59,7 +59,9 @@ class Dashboard extends Component {
 	    	newListingIds.splice(listingIndex, 1);
 	    	const newListings = [].concat(this.state.listings);
 	    	newListings.splice(listingIndex, 1);
-	    	this.setState({listingIds:newListingIds, listings: newListings}); 
+	    	const newPhotoUrls = [].concat(this.state.photoUrls);
+	    	newPhotoUrls.splice(listingIndex, 1);
+	    	this.setState({listingIds:newListingIds, listings: newListings, photoUrls: newPhotoUrls});
     	}
 
 	}
