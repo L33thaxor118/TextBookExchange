@@ -7,6 +7,7 @@ import UserAuthentication from './components/SignIn';
 import CreateListing from './components/CreateListing';
 import ListingDetails from './components/ListingDetails';
 import Search from './components/Search';
+import Dashboard from './components/Dashboard';
 
 import Header from './components/Header';
 
@@ -63,6 +64,7 @@ class App extends Component {
               currentUser={this.state.user}
             />
             <ProtectedRoute path='/listings/:id' component={ListingDetails} currentUser={this.state.user} />
+            <ProtectedRoute path='/dashboard' component={Dashboard} currentUser={this.state.user} />
           </Switch>
         </div>
       </Router>
