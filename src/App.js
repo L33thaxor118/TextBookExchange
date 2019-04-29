@@ -59,6 +59,7 @@ class App extends Component {
           <Route>
             <div className='pageContainer'>
               <Header />
+              <ProtectedRoute exact path='/dashboard' component={Dashboard} currentUser={currentUser} />
               <ProtectedRoute exact path='/listings' component={Search} currentUser={currentUser} />
               <ProtectedRoute
                 exact
