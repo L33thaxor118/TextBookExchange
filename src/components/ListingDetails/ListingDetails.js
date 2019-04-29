@@ -10,7 +10,7 @@ import {
   BookTitle,
 } from './ListingDetails.styled';
 
-import listingsApi from '../api/listings';
+import listingsApi from '../../api/listings';
 
 class ListingDetails extends React.Component {
   state = {
