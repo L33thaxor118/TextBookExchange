@@ -1,10 +1,9 @@
 import { Button, Form, Dropdown, Modal} from 'semantic-ui-react';
 import React, { Component } from 'react';
-import styles from './CreateListing.css';
 
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import styles from './CreateListing.module.scss';
+import styles from './CreateListing.css';
 import UploadComponent from './UploadComponent/UploadComponent';
 import PhotoUploadPreview from './PhotoUploadPreview/PhotoUploadPreview';
 import SelectBook from './SelectBook/SelectBook'

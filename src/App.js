@@ -3,10 +3,10 @@ import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faExchangeAlt } from '@fortawesome/free-solid-svg-icons'
-import UserAuthentication from './SignIn';
-import CreateListing from './CreateListing';
-import ListingDetails from './ListingDetails';
-import Search from './Search';
+import UserAuthentication from './components/SignIn';
+import CreateListing from './components/CreateListing';
+import ListingDetails from './components/ListingDetails';
+import Search from './components/Search';
 
 // Stylesheets
 import './App.css';

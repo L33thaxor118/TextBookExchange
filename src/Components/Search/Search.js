@@ -7,7 +7,7 @@ import Fuse from 'fuse.js';
 
 import { StyledSearch, CreateListingButton, SearchContainer } from './Search.styled';
 
-import listingsApi from '../api/listings';
+import listingsApi from '../../api/listings';
 
 class Search extends Component {
   // maintain query in state and search results

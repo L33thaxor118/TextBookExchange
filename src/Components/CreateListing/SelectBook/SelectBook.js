@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Dropdown, Message, Input } from 'semantic-ui-react';
-import styles from './SelectBook.module.scss';
+import styles from './SelectBook.css';
 
 class SelectBook extends Component {
 

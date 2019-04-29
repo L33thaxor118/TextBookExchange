@@ -4,7 +4,7 @@ import { Button, Form, Message, Card } from 'semantic-ui-react';
 import styles from './SignIn.css';
 import { ErrorContainer, ToggleLink } from './SignIn.styled';
 
-import usersApi from '../api/users';
+import usersApi from '../../api/users';
 import { authentication } from '../../utils/firebase';
 
 class UserAuthentication extends Component {

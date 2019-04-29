@@ -15,29 +15,25 @@
 .exchange {
   display: flex;
   flex-direction: row;
-  .offer {
-    h1 {
-      text-align: center;
-    }
-  }
-  .tradeFor {
-    h1 {
-      text-align: center;
-    }
-  }
+}
 
-  .icon {
-    align-self: center;
-    margin-left: 5%;
-    margin-right: 5%;
-  }
+.exchange .offer h1,
+.exchange .offer .tradeFor h1 {
+  text-align: center;
+}
+
+.exchange .icon {
+  align-self: center;
+  margin-left: 5%;
+  margin-right: 5%;
 }
 
 .mainForm {
   display: flex;
   flex-direction: column;
   margin-bottom: 5%;
-  .description {
+  
+  & .description {
     width: 100%;
   }
 }
