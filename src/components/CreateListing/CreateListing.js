@@ -9,7 +9,7 @@ import PhotoUploadPreview from './PhotoUploadPreview/PhotoUploadPreview';
 import SelectBook from './SelectBook/SelectBook'
 import { authentication, uploadPhotos, fetchPhotoUrls } from '../../utils/firebase'
 import { connect } from 'react-redux';
-import { get_books, post_book, post_book_failure, post_listing} from '../../redux/actions/index';
+import { getBooks, createBook, createListing } from '../../redux/actions/index';
 
 const lookupBookByISBN = isbn => axios.get('https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn).then(({ data }) => data);
 
@@ -102,7 +102,6 @@ async handleCreate() {
     let newListing = this.state.newListing;
     if (this.state.isbnNotFound && !this.state.selectedFromDropdown) return;
     if (this.state.tradeIsbnNotFound && !this.state.selectedFromDropdownTrade) return;
-    this.props.setBookCreateFailure(false);
 
     if (!this.state.selectedFromDropdown) {
       let book = {};
@@ -321,17 +320,15 @@ async handleCreate() {
 const mapStateToProps = (state) => {
   return {
     books: state.books,
-    getBooksHasFailed: state.getBooksHasFailed,
     createBookHasFailed: state.createBookHasFailed,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    getData: () => dispatch(get_books()),
-    createBook: (book, trade) => dispatch(post_book(book, trade)),
-    setBookCreateFailure: (bool) => dispatch(post_book_failure(bool)),
-    createListing: (listing) => dispatch(post_listing(listing))
+    getData: () => dispatch(getBooks.start()),
+    createBook: book => dispatch(createBook.start(book)),
+    createListing: listing => dispatch(createListing.start(listing))
   };
 }
 

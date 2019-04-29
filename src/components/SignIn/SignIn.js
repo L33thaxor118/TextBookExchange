@@ -1,18 +1,16 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { Button, Form, Message, Card } from 'semantic-ui-react';
 
-import styles from './SignIn.css';
-import { ErrorContainer, ToggleLink } from './SignIn.styled';
+import { SignInContainer, ErrorContainer, ToggleLink } from './SignIn.styled';
 
-import usersApi from '../../api/users';
-import { authentication } from '../../utils/firebase';
+import { createUser, login } from '../../redux/reducers/userReducer';
 
 class UserAuthentication extends Component {
   state = {
     email: '',
     displayName: '',
     password: '',
-    error: null,
     isRegisterScreen: false,
   };
 
@@ -22,25 +20,21 @@ class UserAuthentication extends Component {
     this.props.history.push(from || '/');
   };
 
-  // TODO: Move all of this into a Redux reducer
   async handleFormSubmit() {
-    const { isRegisterScreen } = this.state;
-    try {
-      const authMethod = (isRegisterScreen ? 'createUser' : 'signIn') + 'WithEmailAndPassword';
-      const { email, password, displayName } = this.state;
-      const { user } = await authentication[authMethod](email, password);
-      
-      if (user && isRegisterScreen) {
-        await usersApi.create({
-          firebaseId: user.uid,
-          displayName,
-          email,
-        });
-      }
+    const { isRegisterScreen, email, password, displayName } = this.state;
+    
+    if (isRegisterScreen) {
+      await this.props.createUser({
+        email,
+        displayName,
+        password
+      });
+    } else {
+      await this.props.login({ email, password });
+    }
 
+    if (!this.props.error) {
       this.redirectToPreviousPage();
-    } catch (error) {
-      this.setState({ error: error.message || 'An unknown error occurred' });
     }
   }
 
@@ -48,17 +42,16 @@ class UserAuthentication extends Component {
     [fieldName]: event.target.value
   });
 
-  toggleScreenType = isRegisterScreen => () => this.setState({
-    isRegisterScreen,
-    error: null
-  });
+  toggleScreenType = isRegisterScreen => () => this.setState({ isRegisterScreen });
 
   render() {
-    const { error, isRegisterScreen } = this.state;
+    const { isRegisterScreen } = this.state;
+    const { error } = this.props;
+
     const actionName = isRegisterScreen ? 'Register' : 'Sign In';
 
     return (
-      <div className={styles.container}>
+      <SignInContainer>
         <Card>
           <Card.Content>
             <Card.Header>{actionName}</Card.Header>
@@ -107,14 +100,22 @@ class UserAuthentication extends Component {
               <Message
                 color='red'
                 header='Error'
-                content={error}
+                content={error.message}
               />
             </ErrorContainer>
           )}
         </Card>
-      </div>
+      </SignInContainer>
     );
   }
 }
 
-export default UserAuthentication;
+const mapDispatchToProps = dispatch => ({
+  createUser: user => dispatch(createUser(user)),
+  login: user => dispatch(login(user)),
+});
+
+export default connect(
+  state => state.loginState,
+  mapDispatchToProps
+)(UserAuthentication);
