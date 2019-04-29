@@ -7,9 +7,9 @@ export const SignInContainer = styled.div`
   justify-content: center;
 
   width: 100%;
-  height: 100%;
+  height: 100vh;
 
-  padding-top: calc(15% - 30px);
+  padding-top: 15vh;
   background-color: #f9f9f9;
 `;
 
