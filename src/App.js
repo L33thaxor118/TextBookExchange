@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -13,7 +14,9 @@ import Header from './components/Header';
 // Stylesheets
 import './App.css';
 import 'semantic-ui-css/semantic.css';
-import { authentication } from './utils/firebase';
+
+// Redux
+import { loadUserState } from './redux/reducers/userReducer';
 
 library.add(faExchangeAlt);
 
@@ -41,34 +44,37 @@ const ProtectedRoute = ({ component: Component, currentUser, ...rest }) => (
 );
 
 class App extends Component {
-  state = {};
-
   async componentDidMount() {
-    // TODO: move this to Redux
-    authentication.onAuthStateChanged(user => this.setState({ user }))
+    await this.props.loadUserState();
   }
 
   render() {
-    return (
+    const { currentUser } = this.props;
+
+    return currentUser ? (
       <Router>
-        <Header />
-        <div className='pageContainer'>
-          <Switch>
-            <Route exact path='/login' component={UserAuthentication}/>
-            <ProtectedRoute exact path='/listings' component={Search} currentUser={this.state.user} />
+        <Switch>
+          <Route exact path='/login' component={UserAuthentication}/>
+          <div className='pageContainer'>
+            <Header />
+            <ProtectedRoute exact path='/listings' component={Search} currentUser={currentUser} />
             <ProtectedRoute
               exact
               path='/listings/new'
               component={CreateListing}
-              currentUser={this.state.user}
+              currentUser={currentUser}
             />
-            <ProtectedRoute path='/listings/:id' component={ListingDetails} currentUser={this.state.user} />
-          </Switch>
-        </div>
+            <ProtectedRoute path='/listings/:id' component={ListingDetails} currentUser={currentUser} />
+          </div>
+        </Switch>
       </Router>
-    );
+    ) : null;
   }
 }
 
-
-export default App;
+export default connect(
+  state => ({ currentUser: state.loginState.user }),
+  dispatch => ({
+    loadUserState: () => dispatch(loadUserState()),
+  })
+)(App);
