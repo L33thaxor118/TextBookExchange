@@ -52,7 +52,7 @@ export class App extends Component {
   render() {
     const { currentUser } = this.props;
 
-    return currentUser ? (
+    return currentUser !== undefined ? (
       <Router>
         <Route exact path='/login' component={UserAuthentication}/>
         <Route>

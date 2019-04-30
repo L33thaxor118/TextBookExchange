@@ -1,20 +1,15 @@
 #logo {
-  height: 100px;
+  height: 62px;
   margin-left: 0;
+  cursor: pointer;
 }
 
 #navbar {
-  overflow: hidden;
-  padding: 10px; 
-  padding-left: 30px;
-  padding-right: 30px;
-  transition: 0.4s; /* Adds a transition effect when the padding is decreased */
-  width: 100%;
-  top: 0; /* At the top */
-  z-index: 99; 
-  border-bottom-style: inset;
-  border-color: #E94A37;
-  border-width: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 20px;
+  box-shadow: 1px 3px 2px #ddd;
 }
 
 /* Style the navbar links */
@@ -29,19 +24,17 @@
 }
 
 #navbar button {
-  float: left;
-  padding: 12px;
+  // float: left;
   font-size: 18px; 
-  line-height: 25px;
-  border-radius: 20px;
-  border-style: none;
-  margin-top: 30px;
+
+  outline: none;
+  cursor: pointer;
 }
 
 /* Style the active/current link */
 #navbar button.active {
-background-color: #002058;
-color: white !important;
+  background-color: #002058;
+  color: white !important;
 
   &:hover {
     background-color: #ddd;
@@ -51,8 +44,8 @@ color: white !important;
 
 /* Style the inactive/non-current link */
 #navbar button.inactive {
-background-color: white;
-color: black;
+  background-color: white;
+  color: black;
 
   &:hover {
     background-color: #ddd;

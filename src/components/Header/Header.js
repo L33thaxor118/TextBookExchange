@@ -1,66 +1,59 @@
 /** 
 @author Srilakshmi Prasad
 **/
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
+import { Flex } from '@rebass/grid';
+
+import { MenuLink } from './Header.styled';
+
+import { signOut } from '../../redux/reducers/userReducer';
 
 import logo from './logo.png';
 import './Header.scss';
 
-class Header extends Component {
-  constructor(){
-    super();
+const Header = ({ location = {}, history, ...props }) => {
+  const [activeButton, setActiveButton] = useState();
 
-    this.state = {
-      btn_1_active: false,
-      btn_2_active: false,
-      btn_3_active: false
-    }
-  }
+  const navButtons = [
+    {label: 'Search Listings', pathname: '/listings'},
+    {label: 'Create a Listing', pathname: '/listings/new'},
+    {label: 'Dashboard', pathname: '/dashboard'},
+  ];
 
-  //Problem with color changing of buttons
-  changeColor(btn, event) {
-    if(btn=="b1"){
-      console.log("Changing state of b1");
-      this.setState({btn_1_active: true,  
-                     btn_2_active: false,
-                     btn_3_active: false});
-    }
-    if(btn=="b2"){
-      console.log("Changing state of b2");
-      this.setState({btn_1_active: false,  
-                     btn_2_active: true,
-                     btn_3_active: false});
-    }
-    if(btn=="b3"){
-      console.log("Changing state of b3");
-      this.setState({btn_1_active: false,  
-                     btn_2_active: false,
-                     btn_3_active: true});
-    }
-  }
+  const routeToPath = pathname => {
+    setActiveButton(pathname);
+    history.push(pathname);
+  };
 
-  render () {
-    let btn_1 = this.state.btn_1_active ? "active" : "inactive";
-    let btn_2 = this.state.btn_2_active ? "active" : "inactive";
-    let btn_3 = this.state.btn_3_active ? "active" : "inactive";
+  useEffect(() => setActiveButton(location.pathname), [location.pathname]);
 
-    return (
-      <div id="navbar">
-        <a href="/" alt-text="Home"><img id="logo" src={logo} alt="Logo" /></a>
-        <div id="navbar-right">
-          <button className={btn_1} onClick={(e) => this.changeColor("b1", e)}>
-            <a href="/listings">Search Listings</a>
-          </button>
-          <button className={btn_2} onClick={(e) => this.changeColor("b2", e)}>
-            <a href="/listings/new">Create Listing</a>
-          </button>
-          <button className={btn_3} onClick={(e) => this.changeColor("b3", e)}>
-            <a href="/dashboard">User Dashboard</a>
-          </button>
-        </div>
-      </div>
-    );
-  }
-}
+  return (
+    <div id="navbar">
+      <img
+        id='logo'
+        src={logo}
+        alt='site logo'
+        onClick={() => routeToPath('/')}
+      />
+      <Flex>
+        {navButtons.map(({ label, pathname }) => (
+          <MenuLink
+            key={label}
+            className={activeButton === pathname ? 'active' : 'inactive'}
+            onClick={() => routeToPath(pathname)}
+            label={label}
+          />
+        ))}
+        <MenuLink label='Sign out' onClick={props.signOut} />
+      </Flex>
+    </div>
+  );
+};
 
-export default Header;
+
+export default withRouter(connect(
+  undefined,
+  dispatch => ({ signOut: () => dispatch(signOut()) })
+)(Header));
