@@ -50,9 +50,9 @@ export class App extends Component {
   }
 
   render() {
-    const { currentUser } = this.props;
+    const { currentUser, isLoginStateResolved } = this.props;
 
-    return currentUser !== undefined ? (
+    return isLoginStateResolved ? (
       <Router>
         <Route exact path='/login' component={UserAuthentication}/>
         <Route>
@@ -77,7 +77,10 @@ export class App extends Component {
 }
 
 export default connect(
-  state => ({ currentUser: state.loginState.user }),
+  state => ({
+    currentUser: state.loginState.user,
+    isLoginStateResolved: state.loginState.isLoginStateResolved,
+  }),
   dispatch => ({
     loadUserState: () => dispatch(loadUserState()),
   })
