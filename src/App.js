@@ -52,13 +52,13 @@ export class App extends Component {
   render() {
     const { currentUser } = this.props;
 
-    return currentUser ? (
+    return currentUser !== undefined ? (
       <Router>
-        <Switch>
-          <Route exact path='/login' component={UserAuthentication}/>
-          <Route>
-            <div className='pageContainer'>
-              <Header />
+        <Route exact path='/login' component={UserAuthentication}/>
+        <Route>
+          <div className='pageContainer'>
+            <Header />
+            <Switch>
               <ProtectedRoute exact path='/dashboard' component={Dashboard} currentUser={currentUser} />
               <ProtectedRoute exact path='/listings' component={Search} currentUser={currentUser} />
               <ProtectedRoute
@@ -68,9 +68,9 @@ export class App extends Component {
                 currentUser={currentUser}
               />
               <ProtectedRoute path='/listings/:id' component={ListingDetails} currentUser={currentUser} />
-            </div>
-          </Route>
-        </Switch>
+            </Switch>
+          </div>
+        </Route>
       </Router>
     ) : null;
   }

@@ -6,6 +6,8 @@ import listingsApi from '../../api/listings';
 import usersApi from '../../api/users';
 import { authentication, fetchPhotoUrls } from '../../utils/firebase';
 
+import './Dashboard.scss';
+
 class Dashboard extends Component {
 	constructor() {
 		super();
@@ -71,7 +73,7 @@ class Dashboard extends Component {
 	}
 	render () {
 		return (
-			<div>
+			<div id="dashboard-content">
 			<Header as='h2' textAlign='center'>Your Dashboard </Header>
 			
 			{(this.state.listings)?

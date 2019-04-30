@@ -61,11 +61,13 @@ class CreateListing extends Component {
     this.checkIfBookExists = this.checkIfBookExists.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     if (this.props.listing != null) {
       console.log("modify mode")
     }
-    this.props.getData();
+    
+    await this.props.getData();
+    
     const user = authentication.currentUser
     const listing = {
       bookId:"",
@@ -76,7 +78,8 @@ class CreateListing extends Component {
       price: 0,
       exchangeBook: "",
       userId: user == null ? null : user.uid
-    }
+    };
+    
     this.setState({
       books: this.props.books,
       newListing: listing
@@ -324,7 +327,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
     getData: () => dispatch(getBooks.start()),
     createBook: book => dispatch(createBook.start(book)),
