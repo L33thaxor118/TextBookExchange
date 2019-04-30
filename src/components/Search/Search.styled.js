@@ -13,7 +13,7 @@ export const SearchContainer = styled.div`
     padding: 0px;
     border: none!important;
 
-    & > .segments {
+    & > .segments, .segment {
       border-radius: 0px;
     }
   }
