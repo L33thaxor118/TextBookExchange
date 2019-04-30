@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseUri = 'http://uofi-book-exchange-backend.herokuapp.com';
+const baseUri = 'https://uofi-book-exchange-backend.herokuapp.com';
 
 export const makeRequest = (options = {}) => {
   const { id, method, endpoint, params } = options;
