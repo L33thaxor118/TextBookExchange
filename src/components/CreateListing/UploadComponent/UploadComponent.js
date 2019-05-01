@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import styles from './UploadComponent.css';
+import { UploadComponentContainer } from './UploadComponent.styled';
 
 //SOURCE: https://medium.com/@650egor/simple-drag-and-drop-file-upload-in-react-2cb409d88929
 
@@ -70,11 +70,10 @@ class UploadComponent extends Component {
 
   render() {
     return (
-      <div className={styles.container} ref={this.dropboxRef}>
-        <div className={this.state.dragging ? styles.overlay_visible : styles.overlay_hidden
-}>
+      <UploadComponentContainer ref={this.dropboxRef}>
+        <div className={this.state.dragging ? 'overlay_visible' : 'overlay_hidden'}>
         </div>
-      </div>
+      </UploadComponentContainer>
     );
   }
 

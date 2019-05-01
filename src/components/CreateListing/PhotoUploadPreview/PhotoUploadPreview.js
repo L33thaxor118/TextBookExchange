@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import styles from './PhotoUploadPreview.css';
+import {PhotoUploadPreviewContainer} from './PhotoUploadPreview.styled';
 
 class PhotoUploadPreview extends Component {
   constructor() {
@@ -12,10 +12,10 @@ class PhotoUploadPreview extends Component {
   }
   render() {
     return (
-      <div className={styles.container}>
+      <PhotoUploadPreviewContainer>
         <img alt="upload" src={this.props.photo}/>
         <h1 onClick={this.remove}>X</h1>
-      </div>
+      </PhotoUploadPreviewContainer>
     );
   }
 
