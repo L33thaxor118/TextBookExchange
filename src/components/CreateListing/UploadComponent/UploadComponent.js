@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { UploadComponentContainer } from './UploadComponent.styled';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 
 //SOURCE: https://medium.com/@650egor/simple-drag-and-drop-file-upload-in-react-2cb409d88929
 
@@ -69,10 +71,24 @@ class UploadComponent extends Component {
   }
 
   render() {
+    let content = {};
+    if (this.state.dragging) {
+      content = (
+      <div className={'dragging'}>
+        <FontAwesomeIcon className={'icon'} icon="plus" size="3x"/>
+      </div>
+      );
+    } else {
+      content = (
+      <div className={'idle'}>
+        <FontAwesomeIcon className={'icon'} icon="upload" size="3x"/>
+        <h3> Drag to Upload! </h3>
+      </div>
+      );
+    }
     return (
       <UploadComponentContainer ref={this.dropboxRef}>
-        <div className={this.state.dragging ? 'overlay_visible' : 'overlay_hidden'}>
-        </div>
+        {content}
       </UploadComponentContainer>
     );
   }

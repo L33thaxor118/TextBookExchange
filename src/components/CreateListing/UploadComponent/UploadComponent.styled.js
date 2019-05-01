@@ -2,22 +2,29 @@ import styled from 'styled-components';
 
 export const UploadComponentContainer = styled.div`
   position: relative;
+  border-style: dashed;
+  border-radius: 10px;
   width: 100%;
   height: 100%;
-  border-style: dashed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 
-  .overlay_visible {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-color: grey;
-    opacity: 0.2;
+  .idle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
-  .overlay_hidden {
-    position: absolute;
-    visibility: hidden;
+  .dragging {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
+    background-color: blue;
+    opacity: 0.3;
   }
+
 `;

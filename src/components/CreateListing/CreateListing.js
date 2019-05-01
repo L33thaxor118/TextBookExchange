@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { CreateListingContainer, Exchange } from './CreateListing.styled';
+import { CreateListingContainer, Exchange, CreateListingMainForm } from './CreateListing.styled';
 import UploadComponent from './UploadComponent/UploadComponent';
 import PhotoUploadPreview from './PhotoUploadPreview/PhotoUploadPreview';
 import SelectBook from './SelectBook/SelectBook'
@@ -40,10 +40,12 @@ class CreateListing extends Component {
       cashOnly: false,
 
       newBookFormISBN: "",
+      displayBookTitle: "",
       isbnLoading: false,
       isbnNotFound: false,
 
       newTradeBookFormISBN: "",
+      displayTradeBookTitle: "",
       tradeIsbnLoading: false,
       tradeIsbnNotFound: false,
 
@@ -131,7 +133,7 @@ async handleCreate() {
       newListing.bookId = book._id;
     }
     if (!this.state.selectedFromDropdownTrade && !this.state.cashOnly) {
-      if (this.state.newBookFormISBN.length === 0) {
+      if (this.state.newTradeBookFormISBN.length === 0) {
         console.log("empty!");
         return;
       }
@@ -163,10 +165,12 @@ async handleCreate() {
 
     try {
       let createdListing = await this.props.createListing(newListing);
+      console.log(createdListing);
       await uploadPhotos(createdListing._id, this.state.imageFileList);
+      console.log("successfuly uploaded photos");
       console.log(await fetchPhotoUrls(createdListing._id, createdListing.imageNames));
     } catch(error) {
-      console.log("failed to create listing")
+      console.log(error);
       return;
     }
   }
@@ -178,7 +182,7 @@ async handleCreate() {
       break;
 
       case "dropdownOffer":
-      this.setState({ selectedFromDropdown: true});
+      this.setState({ selectedFromDropdown: true, isbnLoading:false});
       break;
 
       case "isbntradeFor":
@@ -186,7 +190,7 @@ async handleCreate() {
       break;
 
       case "dropdowntradeFor":
-      this.setState({ selectedFromDropdownTrade: true });
+      this.setState({ selectedFromDropdownTrade: true, tradeIsbnLoading:false });
       break;
 
       default:
@@ -216,16 +220,26 @@ async handleCreate() {
     this.setState({
       newBookFormISBN: event.target.value,
       isbnLoading: digits? true : false,
-      isbnNotFound: false
+      isbnNotFound: false,
+      displayBookTitle: ""
     });
     if (digits == 10 || digits == 13) {
-      try {
-        let response = await lookupBookByISBN(event.target.value);
-        let notFound = false;
-        if (response.totalItems < 1) notFound = true;
+      let book = this.checkIfBookExists(event.target.value);
+      if (book != null) {
         this.setState({
           isbnLoading: false,
-          isbnNotFound: notFound
+          isbnNotFound: false,
+          displayBookTitle: book.title
+        });
+        return;
+      }
+      try {
+        let response = await lookupBookByISBN(event.target.value);
+        let title = response.items[0].volumeInfo.title;
+        this.setState({
+          isbnLoading: false,
+          isbnNotFound: false,
+          displayBookTitle: title
         });
       } catch {
         this.setState({
@@ -241,16 +255,26 @@ async handleCreate() {
     this.setState({
       newTradeBookFormISBN: event.target.value,
       tradeIsbnLoading: digits? true : false,
-      tradeIsbnNotFound: false
+      tradeIsbnNotFound: false,
+      displayTradeBookTitle: ""
     });
     if (digits == 10 || digits == 13) {
-      try {
-        let response = await lookupBookByISBN(event.target.value);
-        let notFound = false;
-        if (response.totalItems < 1) notFound = true;
+      let book = this.checkIfBookExists(event.target.value);
+      if (book != null) {
         this.setState({
           tradeIsbnLoading: false,
-          tradeIsbnNotFound: notFound
+          tradeIsbnNotFound: false,
+          displayTradeBookTitle: book.title
+        });
+        return;
+      }
+      try {
+        let response = await lookupBookByISBN(event.target.value);
+        let title = response.items[0].volumeInfo.title;
+        this.setState({
+          tradeIsbnLoading: false,
+          tradeIsbnNotFound: false,
+          displayTradeBookTitle: title
         });
       } catch {
         this.setState({
@@ -317,7 +341,9 @@ async handleCreate() {
     var imageFiles = this.state.imageFileList;
     for (let i = 0; i < imageFiles.length; i++) {
       imageContainers.push(
+          <div className={'previewImage'}>
           <PhotoUploadPreview removePhoto={this.handleRemovePhoto} photo={createObjectURL(imageFiles[i])} idx = {i}/>
+          </div>
         );
     }
 
@@ -331,6 +357,7 @@ async handleCreate() {
             <SelectBook bookOptions = {bookOptions}
               bookCreationHandler= {this.openModal}
               onRadioButtonChange = {this.radioButtonChanged}
+              displayTitle = {this.state.displayBookTitle}
               name = {"Offer"}
               bookSelected = {this.bookSelected}
               loading = {this.state.isbnLoading}
@@ -352,6 +379,7 @@ async handleCreate() {
             <SelectBook bookOptions = {bookOptions}
               bookCreationHandler = {this.openModal}
               disabled = {this.state.cashOnly}
+              displayTitle = {this.state.displayTradeBookTitle}
               onRadioButtonChange = {this.radioButtonChanged}
               name = {"tradeFor"}
               bookSelected = {this.tradeBookSelected}
@@ -364,7 +392,7 @@ async handleCreate() {
           </div>
         </Exchange>
 
-        <div className={'mainForm'}>
+        <CreateListingMainForm>
           <Form>
             <Form.Field>
               <label>Description</label>
@@ -373,11 +401,15 @@ async handleCreate() {
           </Form>
 
           <div className={'uploadComponentContainer'}>
-            <UploadComponent handleFileDrop = {this.handleFileDrop}></UploadComponent>
-            {imageContainers}
+            <div className={'dragbox'}>
+              <UploadComponent handleFileDrop = {this.handleFileDrop}/>
+            </div>
+            <div className={'imagesContainer'}>
+              {imageContainers}
+            </div>
           </div>
           <Button type='submit' onClick={this.handleCreate}>Create</Button>
-        </div>
+        </CreateListingMainForm>
 
       </CreateListingContainer>
     );

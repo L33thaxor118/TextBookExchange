@@ -8,18 +8,18 @@ class ListCreator extends Component {
     this.state = {
       inputText: ""
     };
-    this.removeCourse = this.removeCourse.bind(this);
-    this.addCourse = this.addCourse.bind(this);
+    this.removeItem = this.removeItem.bind(this);
+    this.addItem = this.addItem.bind(this);
     this.inputChanged = this.inputChanged.bind(this);
   }
 
-  addCourse() {
+  addItem() {
     console.log(this.state.inputText);
-    this.props.addCourse(this.state.inputText);
+    this.props.addItem(this.state.inputText);
   }
 
-  removeCourse(event, data) {
-    console.log(data);
+  removeItem(event, {label}) {
+    this.props.removeItem(label);
   }
 
   inputChanged(event){
@@ -30,21 +30,21 @@ class ListCreator extends Component {
   }
 
   render() {
-    let courses = this.props.courses.map(course => {
+    let items = this.props.items.map(item => {
       return (
-        <Button label={course}
+        <Button label={item}
           labelPosition='left'
-          onClick={this.removeCourse}>{'X'}
-        </Button>
+          onClick={this.removeItem}>
+        X</Button>
       );
     });
     return (
       <ListCreatorContainer>
         <div className='input'>
-          <Input placeholder= 'Enter Course number' onChange={this.inputChanged} />
-          <Button className={'addButton'} onClick={this.addCourse}>+</Button>
+          <Input placeholder= 'Enter Item' onChange={this.inputChanged} />
+          <Button className={'addButton'} onClick={this.addItem}>+</Button>
         </div>
-        {courses}
+        {items}
       </ListCreatorContainer>
     );
   }
