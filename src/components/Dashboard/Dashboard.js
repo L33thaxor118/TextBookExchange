@@ -2,7 +2,7 @@ import { Button, List, Image, Icon, Header, Dropdown, Input, Message, Grid } fro
 import React, { Component } from 'react';
 import { Flex } from '@rebass/grid';
 
-import styles from './Dashboard.scss';
+import './Dashboard.scss';
 import listingsApi from '../../api/listings';
 import usersApi from '../../api/users';
 import booksApi from '../../api/books';
@@ -321,7 +321,7 @@ class Dashboard extends Component {
 					 {bookAdded && <Message
 					 	  className="error-msg"
 					      positive
-					      header='BOOK was added to your wishlist !'
+					      header='BOOK added to your wishlist !'
 					    />}
 
 					   </div>
