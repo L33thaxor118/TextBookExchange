@@ -6,8 +6,9 @@ import { Segment, Menu, Icon, Popup } from 'semantic-ui-react';
 import Fuse from 'fuse.js';
 
 import SearchResults from './SearchResults';
+import FilterPopup from './FilterPopup';
 
-import { StyledSearch, CreateListingButton, SearchContainer } from './Search.styled';
+import { StyledSearch, MenuButton, SearchContainer } from './Search.styled';
 
 import listingsApi from '../../api/listings';
 
@@ -15,9 +16,10 @@ class Search extends Component {
   // maintain query in state and search results
   state = {
     query: '',
-    // currently contains mock JSON objects
     results: [],
+    filteredResults: [],
     listings: null,
+    filterOptions: null,
   };
 
   async componentDidMount() {
@@ -45,11 +47,45 @@ class Search extends Component {
   // Fuzzy search over book title AND authors
   filterListings = query => this.fuse ? this.fuse.search(query) : [];
 
+  createFilterFnFromOptions = filterOptions => {
+    const { priceRange, conditions, max } = filterOptions;
+    
+    let [lowerBoundPrice, upperBoundPrice] = priceRange;
+    
+    if (upperBoundPrice === max) {
+      upperBoundPrice = Infinity;
+    }
+
+    const isInPriceRange = price => price >= lowerBoundPrice && price <= upperBoundPrice;
+    const hasCondition = condition => conditions.has(condition.toLowerCase());
+
+    return listing => isInPriceRange(listing.price) && hasCondition(listing.condition);
+  };
+
   // redraws component on state change
   handleInputChange = event => {
     const query = event.target.value;
     this.setState({
       results: query.length > 0 ? this.filterListings(query) : []
+    }, () => {
+      const { filterOptions, results } = this.state;
+      if (filterOptions) {
+        this.handleFilterChange(filterOptions);
+      } else {
+        this.setState({ filteredResults: results });
+      }
+    });
+  };
+
+  handleFilterChange = filterOptions => {
+    const { results } = this.state;
+    const filterFn = this.createFilterFnFromOptions(filterOptions);
+
+    const filteredResults = results.filter(filterFn);
+
+    this.setState({
+      filterOptions,
+      filteredResults,
     });
   };
 
@@ -59,9 +95,10 @@ class Search extends Component {
 
   // render search results with assistance of Suggestion component 
   render() {
-    const { results } = this.state;
+    const { filteredResults, filterOptions } = this.state;
+    const { isDefaultFilter = true } = filterOptions || {};
     
-    const Trigger = props => <CreateListingButton {...props} />;
+    const Trigger = props => <MenuButton {...props} />;
 
     return (
       <SearchContainer>
@@ -74,6 +111,11 @@ class Search extends Component {
             onChange={this.handleInputChange}
           />
           <Menu.Menu position='right'>
+            <FilterPopup
+              hasFilter={!isDefaultFilter}
+              currentOptions={this.state.filterOptions}
+              onApplyFilter={this.handleFilterChange}
+            />
             <Popup
               trigger={
                 <Trigger onClick={this.redirectToCreateListing}>
@@ -87,7 +129,7 @@ class Search extends Component {
         </Menu>
         <Segment attached='bottom'>
           <SearchResults
-            results={results}
+            results={filteredResults}
             onItemClick={this.navigateToListingDetails}
           />
         </Segment>

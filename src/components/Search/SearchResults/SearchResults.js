@@ -53,6 +53,17 @@ const SearchResults = ({ results = [], onItemClick = noop }) => {
 
   const headers = ['Book title', 'Condition', 'Price', 'Exchange for', 'Listed by'];
 
+  const applySort = ({ resultsToSort = visibleResults, direction = sortState.direction }) => {
+    if (direction) {
+      setVisibleResults([...resultsToSort].sort((a, b) => {
+        const factor = direction === 'ascending' ? 1 : -1;
+        return factor * ((a.price > b.price) ? 1 : -1);
+      }));
+    } else {
+      setVisibleResults(results);
+    }
+  };
+
   const onSort = header => () => {
     // Right now, we only allow sorting by price
     if (header !== 'Price') return;
@@ -79,17 +90,10 @@ const SearchResults = ({ results = [], onItemClick = noop }) => {
       direction: nextDir
     });
 
-    if (nextDir) {
-      setVisibleResults([...visibleResults].sort((a, b) => {
-        const factor = nextDir === 'ascending' ? -1 : 1;
-        return factor * ((a.price > b.price) ? 1 : -1);
-      }));
-    } else {
-      setVisibleResults(results);
-    }
+    applySort({ direction: nextDir });
   };
 
-  useEffect(() => setVisibleResults(results), [results]);
+  useEffect(() => applySort({ resultsToSort: results }), [results]);
 
   return (
     <View
