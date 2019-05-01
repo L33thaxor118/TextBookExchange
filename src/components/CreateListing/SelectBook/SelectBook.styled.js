@@ -6,7 +6,8 @@ export const SelectBookContainer = styled.div`
   position: relative;
   flex-direction: row;
   align-items: center;
-  border-style: dashed;
+  width: 100%;
+  height: 80%;
   h1 {
     align-self: center;
     margin-left: 3%;
@@ -16,9 +17,10 @@ export const SelectBookContainer = styled.div`
 
 
 export const SelectBookRadioGroup = styled.div`
-  border-style:dashed;
+  padding: 2%;
   width: 100%;
   height: 100%;
+  border-radius:10px;
   display: flex;
   flex-direction: column;
   margin-right: 3%;
@@ -34,6 +36,7 @@ export const SelectBookRadioGroup = styled.div`
     margin-bottom: 10px;
   }
   .input {
+    margin-top:12%;
     position: relative;
   }
 `;

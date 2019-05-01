@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faExchangeAlt } from '@fortawesome/free-solid-svg-icons'
+import { faExchangeAlt, faUpload, faPlus} from '@fortawesome/free-solid-svg-icons'
 import UserAuthentication from './components/SignIn';
 import CreateListing from './components/CreateListing';
 import ListingDetails from './components/ListingDetails';
@@ -20,6 +20,8 @@ import 'semantic-ui-css/semantic.css';
 import { loadUserState } from './redux/reducers/userReducer';
 
 library.add(faExchangeAlt);
+library.add(faUpload);
+library.add(faPlus)
 
 //Source for ProtectedRoute:
 //https://medium.com/@leonardobrunolima/react-tips-how-to-protect-routes-for-unauthorized-access-with-react-router-v4-73c0d451e0a2
@@ -61,7 +63,7 @@ export class App extends Component {
             <Switch>
               <ProtectedRoute exact path='/dashboard' component={Dashboard} currentUser={currentUser} />
               <ProtectedRoute exact path='/listings' component={Search} currentUser={currentUser} />
-              <Route
+              <ProtectedRoute
                 exact
                 path='/listings/new'
                 component={CreateListing}

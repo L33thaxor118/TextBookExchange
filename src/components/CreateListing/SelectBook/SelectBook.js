@@ -54,7 +54,7 @@ class SelectBook extends Component {
             header='Error'
             content={"failed to find ISBN"}
           />
-          <Button type='submit' onClick={this.openModal}>Click to create your own Book</Button>
+          <Button type='submit' onClick={this.openModal}>Create your own</Button>
         </div>
       );
     }
@@ -91,6 +91,7 @@ class SelectBook extends Component {
             onChange= {this.props.createBookFormISBNChanged}
             loading = {this.props.loading}
              />
+          <label>{this.props.displayTitle}</label>
           {errorMessage}
         </SelectBookRadioGroup>
         <CreateBookModal open = {this.state.modalOpen} close = {this.closeModal}/>
