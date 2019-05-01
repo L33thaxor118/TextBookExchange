@@ -1,9 +1,9 @@
-import { Button, Form, Dropdown, Modal} from 'semantic-ui-react';
+import { Button, Form, Dropdown, Checkbox} from 'semantic-ui-react';
 import React, { Component } from 'react';
 
 import axios from 'axios';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import styles from './CreateListing.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { CreateListingContainer, Exchange } from './CreateListing.styled';
 import UploadComponent from './UploadComponent/UploadComponent';
 import PhotoUploadPreview from './PhotoUploadPreview/PhotoUploadPreview';
 import SelectBook from './SelectBook/SelectBook'
@@ -34,9 +34,10 @@ class CreateListing extends Component {
     this.state = {
       imageFileList: [],
       books: [],
-      selectedFromDropdown: false,
-      selectedFromDropdownTrade: false,
+      selectedFromDropdown: true,
+      selectedFromDropdownTrade: true,
       newListing: {},
+      cashOnly: false,
 
       newBookFormISBN: "",
       isbnLoading: false,
@@ -44,9 +45,13 @@ class CreateListing extends Component {
 
       newTradeBookFormISBN: "",
       tradeIsbnLoading: false,
-      tradeIsbnNotFound: false
+      tradeIsbnNotFound: false,
+
+      errorType: "None",
+      modalOpen: false
     }
-    //this.books = [];
+    this.offerBookRef = React.createRef();
+    this.tradeBookRef = React.createRef();
     this.bookOptions = [];
     this.handleFileDrop = this.handleFileDrop.bind(this);
     this.handleCreate = this.handleCreate.bind(this);
@@ -59,19 +64,22 @@ class CreateListing extends Component {
     this.createBookFormISBNChanged = this.createBookFormISBNChanged.bind(this);
     this.createTradeBookFormISBNChanged = this.createTradeBookFormISBNChanged.bind(this);
     this.checkIfBookExists = this.checkIfBookExists.bind(this);
+    this.radioButtonChanged = this.radioButtonChanged.bind(this);
+    this.checkboxChanged = this.checkboxChanged.bind(this);
+    this.openModal = this.openModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
   }
 
   async componentDidMount() {
     if (this.props.listing != null) {
       console.log("modify mode")
     }
-    
+
     await this.props.getData();
-    
+
     const user = authentication.currentUser
     const listing = {
       bookId:"",
-      title: "",
       description: "",
       imageNames: [],
       condition: "",
@@ -79,7 +87,7 @@ class CreateListing extends Component {
       exchangeBook: "",
       userId: user == null ? null : user.uid
     };
-    
+
     this.setState({
       books: this.props.books,
       newListing: listing
@@ -105,17 +113,28 @@ async handleCreate() {
     let newListing = this.state.newListing;
     if (this.state.isbnNotFound && !this.state.selectedFromDropdown) return;
     if (this.state.tradeIsbnNotFound && !this.state.selectedFromDropdownTrade) return;
+    if (this.state.isbnLoading) return;
+    if (this.state.tradeIsbnLoading) return;
 
+    if (this.state.cashOnly) newListing.exchangeBook = "";
+    try{
     if (!this.state.selectedFromDropdown) {
+      if (this.state.newBookFormISBN.length === 0) {
+        console.log("empty!");
+        return;
+      }
       let book = {};
       book = this.checkIfBookExists(this.state.newBookFormISBN);
       if (book == null) {
         book = await this.props.createBook({isbn: this.state.newBookFormISBN});
       }
       newListing.bookId = book._id;
-      newListing.title = book.title;
     }
-    if (!this.state.selectedFromDropdownTrade) {
+    if (!this.state.selectedFromDropdownTrade && !this.state.cashOnly) {
+      if (this.state.newBookFormISBN.length === 0) {
+        console.log("empty!");
+        return;
+      }
       let tradebook = {};
       tradebook = this.checkIfBookExists(this.state.newTradeBookFormISBN);
       if (tradebook == null) {
@@ -123,96 +142,122 @@ async handleCreate() {
       }
       newListing.exchangeBook = tradebook._id;
     }
+    } catch(error) {console.log("failed to create book via isbn"); return;}
+
+    if (newListing.bookId == "" || (newListing.exchangeBook == "" && !this.state.cashOnly) ) {
+      console.log("empty!");
+      return;
+    }
+
+    if (this.state.cashOnly && newListing.price == 0) {
+      console.log("specify price!");
+    }
+
+    if (newListing.condition == "") {
+      console.log("empty condition!");
+      return;
+    }
+
     newListing.imageNames = this.state.imageFileList.map(file => (file.name));
     console.log(newListing);
-    delete newListing.title;
-    let createdListing = await this.props.createListing(newListing);
-    if (createdListing !== undefined) await uploadPhotos(createdListing._id, this.state.imageFileList);
-    console.log(await fetchPhotoUrls(createdListing._id, createdListing.imageNames));
+
+    try {
+      let createdListing = await this.props.createListing(newListing);
+      await uploadPhotos(createdListing._id, this.state.imageFileList);
+      console.log(await fetchPhotoUrls(createdListing._id, createdListing.imageNames));
+    } catch(error) {
+      console.log("failed to create listing")
+      return;
+    }
+  }
+
+  radioButtonChanged(buttonVal) {
+    switch(buttonVal) {
+      case "isbnOffer":
+      this.setState({ selectedFromDropdown: false});
+      break;
+
+      case "dropdownOffer":
+      this.setState({ selectedFromDropdown: true});
+      break;
+
+      case "isbntradeFor":
+      this.setState({ selectedFromDropdownTrade: false });
+      break;
+
+      case "dropdowntradeFor":
+      this.setState({ selectedFromDropdownTrade: true });
+      break;
+
+      default:
+    }
   }
 
   tradeBookSelected(event, data) {
     const { value } = data;
     const updatedListing = this.state.newListing;
-    updatedListing.exchangeBook = "";
-    if (value === "None") {
-      this.setState({
-        newListing: updatedListing,
-        selectedFromDropdownTrade: false
-      })
-    } else {
-      const updatedListing = this.state.newListing;
-      updatedListing.exchangeBook = value;
-      this.setState({
-        newListing: updatedListing,
-        selectedFromDropdownTrade: true
-      });
-    }
+    updatedListing.exchangeBook = value;
+    this.setState({
+      newListing: updatedListing,
+    });
   }
 
   bookSelected(event, data) {
     const { value } = data;
     const updatedListing = this.state.newListing;
-    updatedListing.bookId = "";
-    updatedListing.title = "";
-    if (value === "None") {
-      this.setState({
-        newListing: updatedListing,
-        selectedFromDropdown: false
-      })
-    } else {
-      const { text } = data.options.find(o => o.value === value);
-      const updatedListing = this.state.newListing;
-      updatedListing.bookId = value;
-      updatedListing.title = text;
-      this.setState({
-        newListing: updatedListing,
-        selectedFromDropdown: true
-      });
-    }
+    updatedListing.bookId = value;
+    this.setState({
+      newListing: updatedListing,
+    });
   }
 
   async createBookFormISBNChanged(event) {
+    let digits = event.target.value.length;
     this.setState({
       newBookFormISBN: event.target.value,
-      isbnLoading: true,
+      isbnLoading: digits? true : false,
       isbnNotFound: false
     });
-    try {
-      let response = await lookupBookByISBN(event.target.value);
-      let notFound = false;
-      if (response.totalItems < 1) notFound = true;
-      this.setState({
-        isbnLoading: false,
-        isbnNotFound: notFound
-      });
-    } catch {
-      this.setState({
-        isbnLoading: false,
-        isbnNotFound: true
-      });
+    if (digits == 10 || digits == 13) {
+      try {
+        let response = await lookupBookByISBN(event.target.value);
+        let notFound = false;
+        if (response.totalItems < 1) notFound = true;
+        this.setState({
+          isbnLoading: false,
+          isbnNotFound: notFound
+        });
+      } catch {
+        this.setState({
+          isbnLoading: false,
+          isbnNotFound: true
+        });
+      }
     }
   }
 
   async createTradeBookFormISBNChanged(event) {
+    let digits = event.target.value.length;
     this.setState({
       newTradeBookFormISBN: event.target.value,
-      tradeIsbnLoading: true,
+      tradeIsbnLoading: digits? true : false,
       tradeIsbnNotFound: false
     });
-    try {
-      let response = await lookupBookByISBN(event.target.value);
-      let notFound = false;
-      if (response.totalItems < 1) notFound = true;
-      this.setState({
-        tradeIsbnLoading: false,
-        tradeIsbnNotFound: notFound
-      });
-    } catch {
-      this.setState({
-        tradeIsbnLoading: false,
-        tradeIsbnNotFound: true
-      });
+    if (digits == 10 || digits == 13) {
+      try {
+        let response = await lookupBookByISBN(event.target.value);
+        let notFound = false;
+        if (response.totalItems < 1) notFound = true;
+        this.setState({
+          tradeIsbnLoading: false,
+          tradeIsbnNotFound: notFound
+        });
+      } catch {
+        this.setState({
+          tradeIsbnLoading: false,
+          tradeIsbnNotFound: true
+        });
+      }
     }
   }
 
@@ -247,6 +292,26 @@ async handleCreate() {
     });
   }
 
+  checkboxChanged(event, {checked}) {
+    console.log(checked);
+    this.setState({
+      cashOnly: checked
+    });
+  }
+
+  openModal() {
+    this.setState({
+      modalOpen: true
+    });
+    this.bookSelected(null, {value: "1231421"});
+  }
+
+  closeModal(){
+    this.setState({
+      modalOpen: false
+    });
+  }
+
   render() {
     var imageContainers = [];
     var imageFiles = this.state.imageFileList;
@@ -255,75 +320,75 @@ async handleCreate() {
           <PhotoUploadPreview removePhoto={this.handleRemovePhoto} photo={createObjectURL(imageFiles[i])} idx = {i}/>
         );
     }
+
     var bookOptions = this.props.books.map( book => ({key: book.isbn, text: book.title, value: book._id }) )
-    bookOptions.unshift({key: "no_select", text: "use ISBN", value: "None" })
-
     return (
-      <div className={styles.container}>
-        <div className={styles.exchange}>
-          <div className={styles.offer}>
-          <h1>What you've got</h1>
-          <SelectBook bookOptions = {bookOptions}
-            bookSelected = {this.bookSelected}
-            loading = {this.state.isbnLoading}
-            createBookFormISBNChanged = {this.createBookFormISBNChanged}
-            createBookHasFailed = {this.state.isbnNotFound}
-            selectedFromDropdown = {this.state.selectedFromDropdown}/>
-          </div>
-          <FontAwesomeIcon className={styles.icon} icon="exchange-alt" size="3x"/>
-          <div className={styles.tradeFor}>
-          <h1>What you're looking for</h1>
-          <SelectBook bookOptions = {bookOptions}
-            bookSelected = {this.tradeBookSelected}
-            loading = {this.state.tradeIsbnLoading}
-            createBookFormISBNChanged = {this.createTradeBookFormISBNChanged}
-            createBookHasFailed = {this.state.tradeIsbnNotFound}
-            selectedFromDropdown = {this.state.selectedFromDropdownTrade}/>
-          <Form.Input onChange={this.priceChanged} label="I also/only want Cash" placeholder="$"/>
-          </div>
-        </div>
+      <CreateListingContainer>
+        <Exchange>
 
-        <div className={styles.mainForm}>
+          <div className={'offer'}>
+            <h1>What you've got</h1>
+            <SelectBook bookOptions = {bookOptions}
+              bookCreationHandler= {this.openModal}
+              onRadioButtonChange = {this.radioButtonChanged}
+              name = {"Offer"}
+              bookSelected = {this.bookSelected}
+              loading = {this.state.isbnLoading}
+              createBookFormISBNChanged = {this.createBookFormISBNChanged}
+              createBookHasFailed = {this.state.isbnNotFound}
+              selectedFromDropdown = {this.state.selectedFromDropdown}/>
+              <Dropdown
+                  placeholder='Select condition'
+                  fluid
+                  search
+                  selection
+                  options={conditionOptions}
+                  onChange={this.conditionSelected}
+              />
+          </div>
+          <FontAwesomeIcon className={'icon'} icon="exchange-alt" size="3x"/>
+          <div className={'tradeFor'}>
+            <h1>What you're looking for</h1>
+            <SelectBook bookOptions = {bookOptions}
+              bookCreationHandler = {this.openModal}
+              disabled = {this.state.cashOnly}
+              onRadioButtonChange = {this.radioButtonChanged}
+              name = {"tradeFor"}
+              bookSelected = {this.tradeBookSelected}
+              loading = {this.state.tradeIsbnLoading}
+              createBookFormISBNChanged = {this.createTradeBookFormISBNChanged}
+              createBookHasFailed = {this.state.tradeIsbnNotFound}
+              selectedFromDropdown = {this.state.selectedFromDropdownTrade}/>
+            <Form.Input onChange={this.priceChanged} label="I also want Cash" placeholder="$"/>
+            <Checkbox label='I only want cash. No books' onChange={this.checkboxChanged} />
+          </div>
+        </Exchange>
+
+        <div className={'mainForm'}>
           <Form>
             <Form.Field>
               <label>Description</label>
-              <Form.TextArea className={styles.description} placeholder='describe the book here' onChange={this.descriptionChanged}/>
+              <Form.TextArea className={'description'} placeholder='describe the book here' onChange={this.descriptionChanged}/>
             </Form.Field>
-            <Dropdown
-                placeholder='Select condition'
-                fluid
-                search
-                selection
-                options={conditionOptions}
-                onChange={this.conditionSelected}
-            />
           </Form>
 
-          <div className={styles.uploadComponentContainer}>
+          <div className={'uploadComponentContainer'}>
             <UploadComponent handleFileDrop = {this.handleFileDrop}></UploadComponent>
             {imageContainers}
           </div>
           <Button type='submit' onClick={this.handleCreate}>Create</Button>
         </div>
 
-        <Modal open={this.props.createBookHasFailed}>
-            <Modal.Content>
-              <Modal.Description>
-                <p>FAILED TO CREATE LISTING</p>
-              </Modal.Description>
-            </Modal.Content>
-        </Modal>
-
-      </div>
+      </CreateListingContainer>
     );
   }
-
 }
 
 const mapStateToProps = (state) => {
   return {
     books: state.books,
     createBookHasFailed: state.createBookHasFailed,
+    createListingHasFailed: state.createListingHasFailed
   };
 };
 
