@@ -1,14 +1,15 @@
-import { Button, List, Image, Icon, Header, Dropdown, Input, Message } from 'semantic-ui-react';
+import { Button, List, Image, Icon, Header, Dropdown, Input, Message, Grid } from 'semantic-ui-react';
 import React, { Component } from 'react';
+import { Flex } from '@rebass/grid';
 
-//import styles from './Dashboard.scss';
+import styles from './Dashboard.scss';
 import listingsApi from '../../api/listings';
 import usersApi from '../../api/users';
 import booksApi from '../../api/books';
 import { authentication, fetchPhotoUrls } from '../../utils/firebase';
 
 import {
-  AuthorsList
+  AuthorsList, DashboardMenu
 } from './Dashboard.styled';
 
 
@@ -16,7 +17,6 @@ class Dashboard extends Component {
 	constructor() {
 		super();
 		this.state = {
-			showListings: false,
 			listingIds: [],
 			user: [],
 			listings:[],
@@ -29,12 +29,12 @@ class Dashboard extends Component {
 			wishlistBookTitle:undefined,
 			errorIsbn: false,
 			errorDupl: false,
-			bookAdded: false
+			bookAdded: false,
+			showIndex:1
 		}
 		this.handleDeleteListing = this.handleDeleteListing.bind(this);
 		this.handleDeleteWishlist = this.handleDeleteWishlist.bind(this);
-		this.toggleListings = this.toggleListings.bind(this);
-		this.toggleWishlist = this.toggleWishlist.bind(this);
+		this.toggle = this.toggle.bind(this);
 		this.updateWishlistIsbn = this.updateWishlistIsbn.bind(this);
 		this.updateWishlistBook= this.updateWishlistBook.bind(this);
 		this.addBookToWishlist = this.addBookToWishlist.bind(this);
@@ -147,15 +147,6 @@ class Dashboard extends Component {
   			state: { query: query }
 		})
 	}
-	toggleListings = () => {
-		this.hideMessage();
-		this.setState({showListings:true});
-	}
-
-	toggleWishlist= () => {
-		this.hideMessage();
-		this.setState({showListings:false});
-	}
 
 	async addBookToWishlist () {
 		// if id already in wishlist array, show an error
@@ -210,16 +201,19 @@ class Dashboard extends Component {
 	    });
   	};
     
-//{active ? 'red' : null}
+	toggle (index) {
+		this.setState({showIndex:index});
+	}
 
 	render () {
-		const showListings = (this.state.showListings===true);
+		const showListings = (this.state.showIndex===0);
 		const emptyListings = !(this.state.listings);
 		const emptyWishlist = !(this.state.wishlist);
 		const errorDupl = this.state.errorDupl;
 		const errorIsbn = this.state.errorIsbn;
 		const bookAdded = this.state.bookAdded;
 
+		const dashboardMenu = ['Your Listings', 'Your Wishlist'];
 
 		var bookOptions = this.state.books.map( book => ({key: book.isbn, text: book.title, value: book._id }) )
     	//bookOptions.unshift({key: "no_select", text: "use ISBN", value: "None" })
@@ -228,13 +222,23 @@ class Dashboard extends Component {
 		return (
 			<div id="dashboard-content">
 			<Header as='h2' textAlign='center'>Dashboard </Header>
-			<Button.Group>
-			    <Button onClick={this.toggleListings}> Your Listings </Button>
-			    <Button onClick={this.toggleWishlist}> Your Wishlist </Button>
-			</Button.Group>
+			<div id="dash-nav">
+			<Flex>
+			{dashboardMenu.map((option, index) => {
+	          return <DashboardMenu
+	            key={index}
+	            className={this.state.showIndex === index ? 'active' : 'inactive'}
+	            onClick={() => this.toggle(index)}
+	            label={option}
+	          />
+	      	})
+	      	}
+	      	</Flex>
+	      	</div>
+
 			{showListings? // change
 				(!emptyListings?
-					<div>
+					<div className="dashboard-details">
 					 <List celled>
 					 		{this.state.listings.map((listing, index) => {
 		    				    return (<List.Item>
@@ -245,14 +249,16 @@ class Dashboard extends Component {
 							          Price: {listing.price ? `$${listing.price}` : '—'} <br />
 							          Exchange For: {listing.exchangeBook ? listing.exchangeBook.title : '—'} <br />
 							        </List.Description>
-								      <Button icon labelPosition='left' type='submit' size='tiny' onClick={() => this.navigateToListingEdit(listing._id)}>
+								      <div className="listing-buttons">
+								      <Button className="listing-buttons" icon labelPosition='left' type='submit' size='tiny' onClick={() => this.navigateToListingEdit(listing._id)}>
 								      	<Icon name='edit' />
 								      	Edit
 								      </Button>
-								      	<Button icon color='red' labelPosition='left' type='submit' size='tiny' onClick={() => this.handleDeleteListing(listing._id)}>
+								      	<Button className="listing-buttons" icon color='red' labelPosition='left' type='submit' size='tiny' onClick={() => this.handleDeleteListing(listing._id)}>
 								      	<Icon name='trash' />
 								      	Delete
-								      </Button>						        
+								      </Button>	
+								      </div>					        
 							      </List.Content>
 
 							    </List.Item>)
@@ -265,8 +271,13 @@ class Dashboard extends Component {
 				)
 				:
 				(!emptyWishlist?
+					<div className="dashboard-details">
+					<Grid columns={2} divided>
+					<Grid.Column className="wishlist-form">
 					<div>
+
 					  <Dropdown
+					  	className="form-elem"
     					placeholder='Find book by title...'
     					search
     					selection
@@ -276,33 +287,46 @@ class Dashboard extends Component {
     					onClick = {this.hideMessage}
     					value = {this.state.wishlistBookId}
   						/>
+  						<br></br>
   						<Input
+  						  className="form-elem"
   						  onChange={this.updateWishlistIsbn}
   						  value={this.state.wishlistIsbn}
   						  placeholder='Find book by ISBN...'
   						  onClick = {this.hideMessage}
   						/>
-
-  						<Button icon color='red' labelPosition='left' type='submit' onClick={this.addBookToWishlist}> 
-  							Add book to wishlist !
+  						<br></br>
+  						<Button icon 
+  						color='red' 
+  						labelPosition='left'
+  						type='submit'
+						className="form-elem"
+  						onClick={this.addBookToWishlist}> 
+  							Add to wishlist !
   							<Icon name='heart' />
   						</Button>
-
+  					
 					{errorDupl && <Message
+						  className="error-msg"
 					      error
 					      header='Error'
 					      content='This book is already in your wishlist!'
 					    />}
 					{errorIsbn && <Message
+						  className="error-msg"
 					      error
 					      header='Error'
 					      content='ISBN not found. Please check again.'
 					    />}
 					 {bookAdded && <Message
+					 	  className="error-msg"
 					      positive
 					      header='BOOK was added to your wishlist !'
-					      content=':)'
 					    />}
+
+					   </div>
+					    </Grid.Column>
+					    <Grid.Column className="wishlist-form">
 					 <List celled>
 					 		{this.state.wishlist.map((book, index) => {
 		    				    return (<List.Item>
@@ -313,7 +337,7 @@ class Dashboard extends Component {
 								        </AuthorsList>
 								      <Button icon labelPosition='left' type='submit' size='tiny' onClick={() => this.navigateToBookSearch(book.title)}>
 								      	<Icon name='search' />
-								      	Find listings for this book
+								      	Find listings
 								      </Button>	     
 									<Button icon color='red' labelPosition='left' type='submit' size='tiny' onClick={() => this.handleDeleteWishlist(book)}>
 								      	<Icon name='trash' />
@@ -325,7 +349,10 @@ class Dashboard extends Component {
 							})
 							}
 						</List>
+							</Grid.Column>
+						</Grid>
 					 </div>
+	 
 				:
 				null
 				)

@@ -1,3 +1,45 @@
 #dashboard-content {
     margin-top: 2%;
+    position:relative
+}
+
+.error-msg {
+	margin-top: 10px;
+}
+
+.button-group {
+	margin-top: 15px;
+	left: 50%;
+	position:absolute;
+    transform: translate(-50%,0);
+}
+
+.dashboard-details {
+	margin-top: 80px;
+	position:absolute;
+	left: 50%;
+	transform: translate(-50%,0);
+}
+
+.flex-center {
+	justify-content:center;
+}
+
+#dash-nav {
+	margin-top: 10px;
+	position:absolute;
+	left: 50%;
+	transform: translate(-50%,0);
+}
+
+#wishlist-form {
+	padding-top: 7px;
+}
+
+#form-elem {
+	padding-bottom: 10px;
+}
+
+#listing-buttons {
+	padding-top: 7px;
 }
