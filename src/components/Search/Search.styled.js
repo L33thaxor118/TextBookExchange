@@ -41,7 +41,7 @@ export const StyledSearch = styled(Input)`
   }
 `;
 
-export const CreateListingButton = styled(Menu.Item).attrs({
+export const MenuButton = styled(Menu.Item).attrs({
   className: 'item',
   as: Button,
 })`
