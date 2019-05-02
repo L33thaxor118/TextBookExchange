@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Search, Message, Input, Radio, Button, Label} from 'semantic-ui-react';
+import { Search, Message, Input, Radio, Button} from 'semantic-ui-react';
 import { SelectBookContainer, SelectBookRadioGroup } from './SelectBook.styled';
 import CreateBookModal from '../CreateBookModal/CreateBookModal';
 import _ from 'lodash';
@@ -102,7 +102,7 @@ class SelectBook extends Component {
             checked={this.state.dropdownEnabled === true}
             onChange={this.handleRadioChange} />
           <h3>Select a book from our list: </h3>
-          <Search className={'dropdown'}
+          <Search
               ref = {this.searchRef}
               disabled = {!this.state.dropdownEnabled}
               placeholder='Search for Books'
@@ -127,7 +127,7 @@ class SelectBook extends Component {
             onChange= {this.props.createBookFormISBNChanged}
             loading = {this.props.loading}
              />
-          <Label>{this.props.displayTitle}</Label>
+          <Message hidden={!this.props.displayTitle}>{this.props.displayTitle}</Message>
           {errorMessage}
         </SelectBookRadioGroup>
         <CreateBookModal open = {this.state.modalOpen} close = {this.closeModal}/>
