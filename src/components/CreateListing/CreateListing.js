@@ -1,4 +1,4 @@
-import { Button, Form, Dropdown, Checkbox, Modal, Message} from 'semantic-ui-react';
+import { Button, Form, Dropdown, Checkbox, Message} from 'semantic-ui-react';
 import React, { Component } from 'react';
 
 import axios from 'axios';
@@ -238,7 +238,7 @@ class CreateListing extends Component {
       isbnNotFound: false,
       displayBookTitle: ""
     });
-    if (digits == 10 || digits == 13) {
+    if (digits === 10 || digits === 13) {
       let book = this.checkIfBookExists(event.target.value);
       if (book != null) {
         this.setState({
@@ -274,7 +274,7 @@ class CreateListing extends Component {
       tradeIsbnNotFound: false,
       displayTradeBookTitle: ""
     });
-    if (digits == 10 || digits == 13) {
+    if (digits === 10 || digits === 13) {
       let book = this.checkIfBookExists(event.target.value);
       if (book != null) {
         this.setState({

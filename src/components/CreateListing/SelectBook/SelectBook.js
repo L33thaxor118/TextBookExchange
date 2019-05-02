@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dropdown, Search, Message, Input, Radio, Button, Modal, Form, Label} from 'semantic-ui-react';
+import { Search, Message, Input, Radio, Button, Label} from 'semantic-ui-react';
 import { SelectBookContainer, SelectBookRadioGroup } from './SelectBook.styled';
 import CreateBookModal from '../CreateBookModal/CreateBookModal';
 import _ from 'lodash';
@@ -47,7 +47,7 @@ class SelectBook extends Component {
   }
 
   handleRadioChange(event, { value }) {
-    if (value == ('isbn' + this.props.name)){
+    if (value === ('isbn' + this.props.name)){
       let searchRef = this.searchRef.current;
       searchRef.setValue('');
       this.setState({
@@ -57,7 +57,7 @@ class SelectBook extends Component {
         results: [],
         value: ''
       });
-    } else if (value == ('dropdown' + this.props.name)) {
+    } else if (value === ('dropdown' + this.props.name)) {
       this.setState({
         isbnEnabled: false,
         dropdownEnabled: true
@@ -99,7 +99,7 @@ class SelectBook extends Component {
           <Radio className={'radio'}
             name={this.props.name}
             value={'dropdown' + this.props.name}
-            checked={this.state.dropdownEnabled == true}
+            checked={this.state.dropdownEnabled === true}
             onChange={this.handleRadioChange} />
           <h3>Select a book from our list: </h3>
           <Search className={'dropdown'}
@@ -119,7 +119,7 @@ class SelectBook extends Component {
           <Radio className={'radio'}
             name={this.props.name}
             value={'isbn' + this.props.name}
-            checked={this.state.isbnEnabled == true}
+            checked={this.state.isbnEnabled === true}
             onChange={this.handleRadioChange} />
           <h3>Find by ISBN:</h3>
           <Input className={'input'} placeholder='Enter 10 or 13 digit ISBN'

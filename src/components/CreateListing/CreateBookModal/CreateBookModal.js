@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import {Input, Button, Label, Modal, Form, Message} from 'semantic-ui-react';
-import {CreateBookModalContainer} from './CreateBookModal.styled';
+import {Button, Modal, Form, Message} from 'semantic-ui-react';
 import ListCreator from '../ListCreator/ListCreator';
 import { connect } from 'react-redux';
-import { getBooks, createBook, createListing } from '../../../redux/actions/index';
+import { createBook } from '../../../redux/actions/index';
 
 class CreateBookModal extends Component {
   constructor() {
