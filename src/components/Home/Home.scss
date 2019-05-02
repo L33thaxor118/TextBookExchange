@@ -1,0 +1,36 @@
+$theme-blue: #002058;
+
+html, body, #container, .carousel {
+	height:100%;
+	margin: 0;
+	width: 100%;
+}
+
+h1{
+    text-align: center;
+    color: $theme-blue;
+}
+
+.image-slide {
+    height: 600px;
+    width: 500px;
+    transition: background-image .3s ease-in-out;
+    display:block;
+    margin:auto;
+}
+
+.slide-arrow {
+	color: $theme-blue;
+	cursor: pointer;
+	font-size: 2rem;
+	position: fixed;
+	top: 50%;
+}
+
+.slide-arrow.right {
+	right: 1rem;
+}
+
+.slide-arrow.left {
+	left: 1rem;
+}
