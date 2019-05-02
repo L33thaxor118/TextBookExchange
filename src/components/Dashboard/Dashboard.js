@@ -104,12 +104,6 @@ class Dashboard extends Component {
 	}
 
 	async handleDeleteWishlist(book, bookIndex) {
-		console.log(book._id);
-		console.log(this.state.wishlist[bookIndex]._id);
-		console.log(this.state.wishlistIds[bookIndex]);
-		console.log(bookIndex);
-		console.log(this.state.wishlist.indexOf(book))
-
 		const newWishlistIds = [].concat(this.state.wishlistIds);
 	 	newWishlistIds.splice(bookIndex, 1);
 	 	const newWishlist = [].concat(this.state.wishlist);
@@ -117,8 +111,6 @@ class Dashboard extends Component {
 		var id = this.state.user;
 		const userObj = await usersApi.get({id});
 		var user = userObj.user;
-		console.log(this.state.wishlistIds);
-		console.log(newWishlistIds);
 		const wishlist = newWishlist;
 		var updatedUser = await usersApi.update({id,user,wishlist})
 
@@ -142,8 +134,6 @@ class Dashboard extends Component {
 		})
 	}
 	async addBookToWishlist () {
-		console.log('add');
-		console.log(this.state.wishlistIds);
 		let newBook = this.state.books.find(o => o._id === this.state.wishlistBookId);
 		var wishlist = [].concat(this.state.wishlistIds);
 		wishlist.push(this.state.wishlistBookId);
@@ -163,36 +153,31 @@ class Dashboard extends Component {
 		if (this.state.wishlistBookId==='' && this.state.wishlistIsbn==='') {
 			console.log('Do nothing');
 		}
-		else if (this.state.wishlistBookId!=='') { // book in the DB
+		else if (this.state.wishlistBookId!=='') {
 			var wl = this.state.wishlist;
-			if (wl.some(e => e._id === this.state.wishlistBookId)) {
-				console.log('Book already in wishlist!');
+			if (wl.some(e => e._id === this.state.wishlistBookId)) { // book already in wishlost
 				this.setState({errorDupl:true});
 			}
 			else {
-				console.log('Add book to wishlist');
 				this.addBookToWishlist();
-			} // if already in wishlist do nothing
+			}
 		}
-		else { // add book first then add to wishlist
+		else { 
 			wl = this.state.wishlist;
-			if (wl.some(e => e.isbn === this.state.wishlistIsbn)) {
-				console.log('Book already in wishlist!');
+			if (wl.some(e => e.isbn === this.state.wishlistIsbn)) { // book already in wl
 				this.setState({errorDupl:true});
 			}
 			else {
-				try {
+				try { 
 					var books = this.state.books;
 					var newBook;
 					if (books.some(e => e.isbn === this.state.wishlistIsbn)) {
 						newBook = books.find(e => e.isbn === this.state.wishlistIsbn);
-						console.log('HEREEEEELOL');
 					}
-					else {
+					else { // add book to DB first then add to wishlist
 				        await lookupBookByISBN(this.state.wishlistIsbn);
 				        const newBookObj = await booksApi.create({isbn: this.state.wishlistIsbn});
 				        newBook = newBookObj.book;
-				        console.log('new book ! ');
 					}
 					var wishlist = [].concat(this.state.wishlistIds);
 					wishlist.push(newBook._id);
