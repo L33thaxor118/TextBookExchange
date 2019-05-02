@@ -30,6 +30,7 @@ export const createBook = generateApiCreator(CREATE_BOOK, async (dispatch, newBo
     return book;
   } catch (err) {
     dispatch(createBook.fail(err));
+    throw(err);
   }
 });
 
@@ -40,6 +41,7 @@ export const createListing = generateApiCreator(CREATE_LISTING, async (dispatch,
     return createdListing;
   } catch (err) {
     dispatch(createListing.fail(err));
+    throw(err);
   }
 });
 

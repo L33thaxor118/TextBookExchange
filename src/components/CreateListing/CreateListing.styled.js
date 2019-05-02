@@ -31,11 +31,15 @@ export const CreateListingContainer = styled.div`
       }
     }
   }
+  .errorMessage{
+    display: flex;
+    flex-direction: row;
+  }
 
 `;
 
 export const CreateListingMainForm = styled.div`
-  margin-top: 5%;
+  margin-top: 7%;
   width: 60%;
   display: flex;
   flex-direction: column;

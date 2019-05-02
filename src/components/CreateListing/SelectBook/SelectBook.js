@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
-import { Dropdown, Message, Input, Radio, Button, Modal, Form} from 'semantic-ui-react';
+import { Dropdown, Search, Message, Input, Radio, Button, Modal, Form, Label} from 'semantic-ui-react';
 import { SelectBookContainer, SelectBookRadioGroup } from './SelectBook.styled';
 import CreateBookModal from '../CreateBookModal/CreateBookModal';
+import _ from 'lodash';
 
+const resRender = ({ title, authors }) => (
+      <span key="title">
+        {title} by {authors}
+      </span>
+    );
 
 class SelectBook extends Component {
   constructor() {
@@ -10,18 +16,46 @@ class SelectBook extends Component {
     this.state = {
       dropdownEnabled: true,
       isbnEnabled: false,
-      modalOpen: false
+      modalOpen: false,
+      isSearchLoading: false
     };
+    this.searchRef = React.createRef();
     this.handleRadioChange = this.handleRadioChange.bind(this);
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
+    this.handleSearchChange = this.handleSearchChange.bind(this);
+    this.resetSearch = this.resetSearch.bind(this);
+  }
+
+  resetSearch() {
+    this.setState({ isSearchLoading: false, results: [], value: '' })
+  }
+
+  handleSearchChange(e, {value}) {
+    this.setState({ isSearchLoading: true, value });
+    setTimeout(() => {
+      if (value.length < 1) return this.resetSearch()
+
+      const re = new RegExp(_.escapeRegExp(value), 'i')
+      const isMatch = result => re.test(result.title)
+      console.log(this.source);
+      this.setState({
+        isLoading: false,
+        results: _.filter(this.props.bookOptions, isMatch),
+      })
+    }, 300)
   }
 
   handleRadioChange(event, { value }) {
     if (value == ('isbn' + this.props.name)){
+      let searchRef = this.searchRef.current;
+      searchRef.setValue('');
       this.setState({
         isbnEnabled: true,
-        dropdownEnabled: false
+        dropdownEnabled: false,
+        isSearchLoading: false,
+        results: [],
+        value: ''
       });
     } else if (value == ('dropdown' + this.props.name)) {
       this.setState({
@@ -57,6 +91,7 @@ class SelectBook extends Component {
           <Button type='submit' onClick={this.openModal}>Create your own</Button>
         </div>
       );
+
     }
     return (
       <SelectBookContainer disabled = {this.props.disabled}>
@@ -67,16 +102,17 @@ class SelectBook extends Component {
             checked={this.state.dropdownEnabled == true}
             onChange={this.handleRadioChange} />
           <h3>Select a book from our list: </h3>
-          <Dropdown className={'dropdown'}
+          <Search className={'dropdown'}
+              ref = {this.searchRef}
               disabled = {!this.state.dropdownEnabled}
-              defaultValue={'None'}
-              upward = {false}
-              placeholder='Select Book'
-              fluid
-              search
-              selection
-              options={this.props.bookOptions}
-              onChange={this.props.bookSelected}
+              placeholder='Search for Books'
+              results={this.state.results}
+              onResultSelect={this.props.bookSelected}
+              onSearchChange={_.debounce(this.handleSearchChange, 500, {
+              leading: true,
+            })}
+              minCharacters={3}
+              resultRenderer={resRender}
             />
         </SelectBookRadioGroup>
         <SelectBookRadioGroup selected = {this.state.isbnEnabled}>
@@ -91,7 +127,7 @@ class SelectBook extends Component {
             onChange= {this.props.createBookFormISBNChanged}
             loading = {this.props.loading}
              />
-          <label>{this.props.displayTitle}</label>
+          <Label>{this.props.displayTitle}</Label>
           {errorMessage}
         </SelectBookRadioGroup>
         <CreateBookModal open = {this.state.modalOpen} close = {this.closeModal}/>
