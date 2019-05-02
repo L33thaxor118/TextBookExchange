@@ -1,5 +1,6 @@
 import { Button, List, Image, Icon, Header, Dropdown, Input, Message, Grid } from 'semantic-ui-react';
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { Flex } from '@rebass/grid';
 import axios from 'axios';
 
@@ -49,43 +50,42 @@ class Dashboard extends Component {
 	}
 
 	async componentDidMount() {
-		const id = authentication.currentUser.uid; // log into firebase to get user test w 100
-		const userObj = await usersApi.get({id});
-		console.log(userObj.user.wishlist);
-		const listingIds = userObj.user.listings;
+		const { user } = this.props;
+		
+		const listingIds = user.listings;
 		const booksObj = await booksApi.get({});
+
 		this.setState({
-			user:id,
+			user: user.firebaseId,
 			books: booksObj.books
 		});
-		await Promise.all(listingIds.map(async (id) => {
-    		const listingObj = await listingsApi.get({id});
-    		this.setState({
+
+		await Promise.all(listingIds.map(async id => {
+			const listingObj = await listingsApi.get({ id });
+			this.setState({
 				listings: [...this.state.listings, listingObj.listing],
 				listingIds: [...this.state.listingIds, id]
 			});
-  		}));
+		}));
 
-		await Promise.all(this.state.listings.map(async (listing) => {
-    		const photoUrls = await fetchPhotoUrls(listing._id, listing.imageNames);
-    		if (photoUrls.length===0) {
-    			var photoUrl = 'https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png';
-    		}
-    		else {
-    			photoUrl = photoUrls[0];
-    		}
-    		this.setState({
+		await Promise.all(this.state.listings.map(async listing => {
+			console.info('listing is', listing);
+			const photoUrls = await fetchPhotoUrls(listing._id, listing.imageNames);
+			const photoUrl = photoUrls.length ? photoUrls[0] :  'https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png';
+
+			console.info('photoUrl is', photoUrl);
+			this.setState({
 				photoUrls: [...this.state.photoUrls, photoUrl]
 			});
-  		}));
+		}));
 
-  		await Promise.all(userObj.user.wishlist.map(async (id) => {
-    		const bookObj = await booksApi.get({id});
-    		this.setState({
+		await Promise.all(user.wishlist.map(async id => {
+			const bookObj = await booksApi.get({ id });
+			this.setState({
 				wishlist: [...this.state.wishlist, bookObj.book],
 				wishlistIds:[...this.state.wishlistIds, id]
 			});
-  		}));
+		}));
 	}
 
 	async handleDeleteListing(id) {
@@ -108,11 +108,9 @@ class Dashboard extends Component {
 	 	newWishlistIds.splice(bookIndex, 1);
 	 	const newWishlist = [].concat(this.state.wishlist);
 		newWishlist.splice(bookIndex, 1);
-		var id = this.state.user;
-		const userObj = await usersApi.get({id});
-		var user = userObj.user;
+		const { user } = this.props;
 		const wishlist = newWishlist;
-		var updatedUser = await usersApi.update({id,user,wishlist})
+		const updatedUser = await usersApi.update({id: user.firebaseId, wishlist})
 
 		if (updatedUser) {
 			this.setState({wishlist:newWishlist, wishlistIds:newWishlistIds});
@@ -138,10 +136,8 @@ class Dashboard extends Component {
 		var wishlist = [].concat(this.state.wishlistIds);
 		wishlist.push(this.state.wishlistBookId);
 		console.log(wishlist);
-		var id = this.state.user;
-		const userObj = await usersApi.get({id});
-		var user = userObj.user;
-		await usersApi.update({id,user,wishlist})
+		const { user } = this.props;
+		await usersApi.update({id: user.firebaseId, wishlist})
 		this.setState({bookAdded:true, wishlistIds:[...this.state.wishlistIds,
 			this.state.wishlistBookId], wishlist:[...this.state.wishlist,newBook],
 			currBookTitle:newBook.title});
@@ -182,10 +178,8 @@ class Dashboard extends Component {
 					var wishlist = [].concat(this.state.wishlistIds);
 					wishlist.push(newBook._id);
 					console.log(wishlist);
-					var id = this.state.user;
-					const userObj = await usersApi.get({id});
-					var user = userObj.user;
-					await usersApi.update({id,user,wishlist})
+					const { user } = this.props;
+					await usersApi.update({id: user.firebaseId, wishlist});
 					this.setState({bookAdded:true, wishlistIds:[...this.state.wishlistIds,
 						newBook._id], wishlist:[...this.state.wishlist,newBook],
 						currBookTitle:newBook.title});
@@ -256,7 +250,7 @@ class Dashboard extends Component {
 					<div className="dashboard-details">
 					 <List celled>
 					 		{this.state.listings.map((listing, index) => {
-		    				    return (<List.Item>
+		    				    return (<List.Item key={index}>
 							      <Image src={this.state.photoUrls[index]} size='tiny'/>
 							      <List.Content>
 							      <Header as='h4'>{listing.book.title}</Header>
@@ -342,7 +336,7 @@ class Dashboard extends Component {
 					    <Grid.Column className="wishlist-form">
 					 <List celled>
 					 		{this.state.wishlist.map((book, index) => {
-		    				    return (<List.Item>
+		    				    return (<List.Item key={index}>
 							      <List.Content>
 							      <Header as='h4'>{book.title}</Header>
 							      		{book.authors && <AuthorsList>
@@ -380,4 +374,4 @@ class Dashboard extends Component {
 }
 
 
-export default Dashboard;
+export default connect(state => state.loginState)(Dashboard);
