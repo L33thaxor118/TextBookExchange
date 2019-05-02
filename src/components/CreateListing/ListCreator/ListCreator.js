@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Input, Button, Label} from 'semantic-ui-react';
+import {Input, Button} from 'semantic-ui-react';
 import {ListCreatorContainer} from './ListCreator.styled';
 
 class ListCreator extends Component {
