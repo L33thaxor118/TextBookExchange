@@ -128,14 +128,33 @@ class CreateListing extends Component {
   validateListing() {
     let errors = this.state.errors;
     let newListing = this.state.newListing;
-    if (this.state.selectedFromDropdown && newListing.bookId === "") errors.emptyBook = true;
-    if (!this.state.selectedFromDropdown && this.state.displayBookTitle === "") errors.emptyBook = true;
-    if ((this.state.selectedFromDropdownTrade && newListing.exchangeBook === "") && !this.state.cashOnly) errors.emptyExchangeBook = true;
-    if ((!this.state.selectedFromDropdownTrade && this.state.displayTradeBookTitle === "") && !this.state.cashOnly) errors.emptyExchangeBook = true;
-    if (newListing.price === 0 && this.state.cashOnly) errors.emptyCash = true;
-    if (newListing.condition === "") errors.emptyCondition = true;
+    if (this.state.selectedFromDropdown && newListing.bookId === ""){
+      errors.emptyBook = true;
+    }
+    if (!this.state.selectedFromDropdown && this.state.displayBookTitle === ""){
+      errors.emptyBook = true;
+    }
+    if ((this.state.selectedFromDropdownTrade && newListing.exchangeBook === "")
+          && !this.state.cashOnly){
+      errors.emptyExchangeBook = true;
+    }
+    if ((!this.state.selectedFromDropdownTrade &&
+          this.state.displayTradeBookTitle === "") && !this.state.cashOnly){
+      errors.emptyExchangeBook = true;
+    }
+    if (newListing.price === 0 && this.state.cashOnly) {
+      errors.emptyCash = true;
+    }
+    if (newListing.condition === "") {
+      errors.emptyCondition = true;
+    }
     this.setState({errors:errors});
-    return _.some(errors, true);
+    for (let key in errors) {
+      if (errors[key] === true) {
+          return true;
+      }
+    }
+    return false;
   }
 
   async handleCreate() {
@@ -143,6 +162,7 @@ class CreateListing extends Component {
       setTimeout(this.clearErrors, 6000);
       return;
     }
+    console.log("proceeding");
     let newListing = this.state.newListing;
     if (this.state.cashOnly) newListing.exchangeBook = "";
     try{
@@ -173,11 +193,9 @@ class CreateListing extends Component {
       if (this.state.cashOnly) delete newListing.exchangeBook;
       let createdListing = await this.props.createListing(newListing);
       await uploadPhotos(createdListing._id, this.state.imageFileList);
-      console.log("successfuly uploaded photos");
       console.log(await fetchPhotoUrls(createdListing._id, createdListing.imageNames));
       this.props.history.push('/listings/' + createdListing._id);
     } catch(error) {
-      console.log("internal error");
       this.setInternalError();
       return;
     }
@@ -353,8 +371,8 @@ class CreateListing extends Component {
     var bookOptions = this.props.books.map( book => ({isbn: book.isbn, title: book.title, authors: book.authors, id: book._id }) )
     return (
       <CreateListingContainer>
+        <div className='background'></div>
         <Exchange>
-
           <div className={'offer'}>
             <h1>What you've got</h1>
             <SelectBook bookOptions = {bookOptions}
@@ -367,22 +385,24 @@ class CreateListing extends Component {
               createBookFormISBNChanged = {this.createBookFormISBNChanged}
               createBookHasFailed = {this.state.isbnNotFound}
               selectedFromDropdown = {this.state.selectedFromDropdown}/>
-              <Dropdown
-                  placeholder='Select condition'
-                  fluid
-                  search
-                  selection
-                  options={conditionOptions}
-                  onChange={this.conditionSelected}
-              />
-              <Message error
-                hidden={!(this.state.errors.emptyBook)}>
-                Please select a book
-              </Message>
-              <Message error
-                hidden={!(this.state.errors.emptyCondition)}>
-                Please enter your book's condition
-              </Message>
+              <div className="offerForm">
+                <Dropdown
+                    placeholder='Select condition'
+                    fluid
+                    search
+                    selection
+                    options={conditionOptions}
+                    onChange={this.conditionSelected}
+                />
+                <Message error
+                  hidden={!(this.state.errors.emptyBook)}>
+                  Please select a book
+                </Message>
+                <Message error
+                  hidden={!(this.state.errors.emptyCondition)}>
+                  Please enter your book's condition
+                </Message>
+              </div>
           </div>
           <FontAwesomeIcon className={'icon'} icon="exchange-alt" size="3x"/>
           <div className={'tradeFor'}>

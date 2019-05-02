@@ -1,31 +1,34 @@
 import styled from 'styled-components';
 
 export const CreateListingContainer = styled.div`
-  margin-top:5%;
-  width: 100%;
-  height: 80%;
-  overflow: scroll;
+  margin-top:0%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  .background{
+    position: absolute;
+    z-index: -1;
+    height: 100%;
+    width: 80%;
+    background-color: blue;
+    opacity: 0.2;
+  }
 
   .uploadComponentContainer {
     display: flex;
     flex-direction: row;
-    height: 50vh;
-    width: 100%;
+    height: 30vh;
     .dragbox {
-      height: 100%;
-      width: 30%;
+      display: flex;
+      width: 20%;
     }
     .imagesContainer {
       display: flex;
       flex-direction: row;
-      width: 70%;
-      height: 100%;
+      width: 100%;
       .previewImage {
-        width:45vh;
         height: 100%;
+        width: 20%;
         margin-left: 1vh;
         margin-right: 1vh;
       }
@@ -39,31 +42,38 @@ export const CreateListingContainer = styled.div`
 `;
 
 export const CreateListingMainForm = styled.div`
-  margin-top: 7%;
-  width: 60%;
+  width: 80%;
+  overflow: hidden;
+  margin-top: 2%;
   display: flex;
   flex-direction: column;
   margin-bottom: 5%;
 
   & .description {
     width: 100%;
+    height: 25vh;
   }
 `;
 
 export const Exchange = styled.div`
+  flex-wrap: wrap;
+  overflow: show;
+  width: 80%;
+  margin-top: 3%;
   display: flex;
   flex-direction: row;
-  width: 60%;
-  justify-content: center;
+  justify-content: space-around;
   .offer {
+    display: flex;
+    flex-direction: column;
     flex-grow:1;
-    height: 100%;
     h1 {text-align:center;}
   }
 
   .tradeFor {
-    flex-grow:1
-    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-grow:1;
     h1 {text-align:center;}
   }
 

@@ -5,9 +5,8 @@ export const SelectBookContainer = styled.div`
   display: flex;
   position: relative;
   flex-direction: row;
-  align-items: center;
-  width: 100%;
-  height: 80%;
+  align-items: baseline;
+  justify-content: center;
   h1 {
     align-self: center;
     margin-left: 3%;
@@ -18,11 +17,10 @@ export const SelectBookContainer = styled.div`
 
 export const SelectBookRadioGroup = styled.div`
   padding: 2%;
-  width: 100%;
-  height: 100%;
   border-radius:10px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   margin-right: 3%;
   margin-left: 3%;
   background-color: ${props => props.selected ? "#4286f4" : "white"};
