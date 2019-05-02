@@ -16,7 +16,9 @@ class CreateBookModal extends Component {
 
       titleRequiredError: false,
       isbnRequiredError: false,
-      authorRequiredError: false
+      authorRequiredError: false,
+      bookCreationFailed: false,
+      bookCreationSuccess: false
     };
 
     this.addCourse = this.addCourse.bind(this);
@@ -29,7 +31,7 @@ class CreateBookModal extends Component {
     this.handleCreate = this.handleCreate.bind(this);
   }
 
-  handleCreate() {
+  async handleCreate() {
     let titleRequiredError = false;
     let isbnRequiredError = false;
     let authorRequiredError = false;
@@ -39,10 +41,23 @@ class CreateBookModal extends Component {
     this.setState({
       titleRequiredError: titleRequiredError,
       isbnRequiredError: isbnRequiredError,
-      authorRequiredError: authorRequiredError
+      authorRequiredError: authorRequiredError,
+      bookCreationFailed: false,
+      bookCreationSuccess: false
     });
     if (titleRequiredError || isbnRequiredError || authorRequiredError) return;
-    this.props.createBook(this.state);
+    let newBook = {
+      title: this.state.title,
+      isbn: this.state.isbn,
+      authors: this.state.authors,
+      courses: this.state.courses
+    }
+    try {
+      await this.props.createBook(newBook);
+      this.setState({bookCreationFailed: false, bookCreationSuccess: true});
+    } catch(err) {
+      this.setState({bookCreationFailed: true, bookCreationSuccess: false});
+    }
   }
 
   clearErrors() {
@@ -115,7 +130,7 @@ class CreateBookModal extends Component {
         closeOnEscape={true}
         closeOnRootNodeClick={true}>
         <Modal.Content>
-          <Form error={this.props.createBookHasFailed}>
+          <Form>
             <Form.Field error={this.state.titleRequiredError}>
               <label>Title</label>
               <input onChange = {this.titleChanged} placeholder='title' />
@@ -132,14 +147,16 @@ class CreateBookModal extends Component {
               />
             </Form.Field>
             <h4>Add Relevant Courses</h4>
-            <ListCreator items = {this.state.courses}
-              addItem = {this.addCourse}
-              removeItem = {this.removeCourse}
-            />
+
             <Button type='submit' onClick={this.handleCreate}>Submit</Button>
             <Button color='red' onClick={this.props.close}>Cancel</Button>
-            <Message error content='Failed to Create Book'/>
           </Form>
+          <Message success hidden={!this.state.bookCreationSuccess}>
+            Created book! You can now select it via ISBN or Search
+          </Message>
+          <Message error hidden={!this.state.bookCreationFailed}>
+            Failed to create book
+          </Message>
         </Modal.Content>
       </Modal>
     );
