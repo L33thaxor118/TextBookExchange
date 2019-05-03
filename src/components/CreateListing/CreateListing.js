@@ -4,7 +4,6 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import _ from 'lodash';
 import { CreateListingContainer } from './CreateListing.styled';
-import PhotoUploadPreview from './PhotoUploadPreview/PhotoUploadPreview';
 import SelectBook from './SelectBook/SelectBook'
 import { authentication } from '../../utils/firebase'
 import { connect } from 'react-redux';
@@ -21,16 +20,12 @@ const conditionOptions = [
     { key: 'used - acceptable', text: 'used - acceptable', value: 'used - acceptable' }
 ];
 
-function createObjectURL(object) {
-    return (window.URL) ? window.URL.createObjectURL(object) : window.webkitURL.createObjectURL(object);
-}
-
 
 class CreateListing extends Component {
   constructor() {
     super();
     this.state = {
-      imageFileList: [],
+      imageNames: [],
       books: [],
       selectedFromDropdown: true,
       selectedFromDropdownTrade: true,
@@ -55,9 +50,9 @@ class CreateListing extends Component {
     this.uppyRef = React.createRef();
     this.bookOptions = [];
     this.finish = this.finish.bind(this);
-    this.handleFileDrop = this.handleFileDrop.bind(this);
+    this.handleFileAdded = this.handleFileAdded.bind(this);
     this.handleCreate = this.handleCreate.bind(this);
-    this.handleRemovePhoto = this.handleRemovePhoto.bind(this);
+    this.handleFileRemoved = this.handleFileRemoved.bind(this);
     this.bookSelected = this.bookSelected.bind(this);
     this.tradeBookSelected = this.tradeBookSelected.bind(this);
     this.conditionSelected = this.conditionSelected.bind(this);
@@ -110,14 +105,6 @@ class CreateListing extends Component {
   checkIfCashOnly(){
     if (this.state.cashChecked && !this.state.exchangeBookChecked) return true;
     else return false;
-  }
-
-  handleRemovePhoto(idx) {
-    let newList = this.state.imageFileList;
-    newList.splice(idx, 1);
-    this.setState({
-      imageFileList: newList
-    });
   }
 
   removeIsbnError() {
@@ -212,7 +199,7 @@ class CreateListing extends Component {
         return;
     }
 
-    newListing.imageNames = this.state.imageFileList.map(file => (file.name));
+    newListing.imageNames = this.state.imageNames;
     console.log(newListing);
     try {
       if (this.checkIfCashOnly()) delete newListing.exchangeBook;
@@ -389,10 +376,25 @@ class CreateListing extends Component {
     });
   }
 
-  handleFileDrop(fileList) {
+  handleFileRemoved({name}) {
+    let idx = 0;
+    let newList = this.state.imageNames;
+    for (let i = 0; i < newList.length; i++) {
+      if (newList[i] === name) break;
+      idx++;
+    }
+    newList.splice(idx, 1);
     this.setState({
-      imageFileList: [...this.state.imageFileList, fileList[0]]
-    });
+      imageNames: newList
+    }, ()=>{console.log(this.state.imageNames)});
+  }
+
+  handleFileAdded({name}) {
+    let found = this.state.imageNames.find(imgName=>{return imgName === name});
+    if (found !== undefined) return;
+    this.setState({
+      imageNames: [...this.state.imageNames, name]
+    }, ()=>{console.log(this.state.imageNames)});
   }
 
   cashChecked(event, {checked}) {
@@ -415,15 +417,6 @@ class CreateListing extends Component {
 
   render() {
     var bookOptions = this.props.books.map( book => ({isbn: book.isbn, title: book.title, authors: book.authors, id: book._id }) )
-    var imageContainers = [];
-    var imageFiles = this.state.imageFileList;
-    for (let i = 0; i < imageFiles.length; i++) {
-      imageContainers.push(
-          <div className={'previewImage'}>
-            <PhotoUploadPreview removePhoto={this.handleRemovePhoto} photo={createObjectURL(imageFiles[i])} idx = {i}/>
-          </div>
-      );
-    }
     var exchangeBook = null;
     if (this.state.exchangeBookChecked) {
       exchangeBook = (
@@ -495,7 +488,9 @@ class CreateListing extends Component {
               listingId={this.state.listingId}
               trigger = {({ onClick }) =>
                 <Button color='teal' size='massive' icon='upload' onClick={onClick}></Button>}
-              ref={el => this.uppyRef = el}/>
+              ref={el => this.uppyRef = el}
+              onFileAdded={this.handleFileAdded}
+              onFileRemoved={this.handleFileRemoved}/>
           </div>
           <div className={'tradeFor'}>
             <h2>Exchange for</h2>

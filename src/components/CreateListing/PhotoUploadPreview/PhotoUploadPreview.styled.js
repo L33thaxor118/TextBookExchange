@@ -2,8 +2,9 @@ import styled from 'styled-components';
 
 export const PhotoUploadPreviewContainer = styled.div`
   position: relative;
-  width: 100%;
+  width: 10%;
   height: 100%;
+  margin: 0 5px 0 5px;
 
   h1, img {
     position: absolute;

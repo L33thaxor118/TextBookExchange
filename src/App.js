@@ -7,6 +7,7 @@ import { faExchangeAlt, faUpload, faPlus} from '@fortawesome/free-solid-svg-icon
 import UserAuthentication from './components/SignIn';
 import CreateListing from './components/CreateListing';
 import ListingDetails from './components/ListingDetails';
+import ModifyListing from './components/ModifyListing';
 import Search from './components/Search';
 import Dashboard from './components/Dashboard';
 
@@ -73,6 +74,7 @@ export class App extends Component {
                 component={CreateListing}
                 currentUser={currentUser}
               />
+              <Route path='/listings/modify/:id' component ={ModifyListing} currentUser={currentUser} />
               <ProtectedRoute path='/listings/:id' component={ListingDetails} currentUser={currentUser} />
             </Switch>
           </div>
