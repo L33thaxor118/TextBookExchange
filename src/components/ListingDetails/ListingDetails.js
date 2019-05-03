@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { Divider, Segment } from 'semantic-ui-react';
+import { Button, Divider, Segment } from 'semantic-ui-react';
 import { Flex } from '@rebass/grid';
 import PhotosCarousel from './PhotosCarousel/PhotosCarousel';
 import './ListingDetails.scss'
@@ -64,8 +64,17 @@ class ListingDetails extends React.Component {
                   </div>
                 </Flex>
                 <Isbn> ISBN: {this.state.listing.book.isbn}</Isbn>
-                <div class="interested"> Interested in this listing?
-                 <a class="link" href={'mailto:'+ this.state.listing.assignedUser.email + '?subject=UIUC TEXTBOOK EXCHANGE - Interested in your book '+ this.state.listing.book.title}>Contact {this.state.listing.assignedUser.displayName} !</a>
+                <div class="interested"> 
+                <p>Interested in this listing?</p>
+                  <Button> 
+                    <a class="link" 
+                      href={'mailto:'+ 
+                            this.state.listing.assignedUser.email + 
+                            '?subject=UIUC TEXTBOOK EXCHANGE - Interested in your book '
+                            + this.state.listing.book.title}>
+                      {"Contact " + this.state.listing.assignedUser.displayName}
+                    </a>
+                  </Button>
                 </div>
             </Flex>
           </Flex>
