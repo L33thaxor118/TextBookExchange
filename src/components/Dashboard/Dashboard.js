@@ -8,7 +8,7 @@ import './Dashboard.scss';
 import listingsApi from '../../api/listings';
 import usersApi from '../../api/users';
 import booksApi from '../../api/books';
-import { authentication, fetchPhotoUrls } from '../../utils/firebase';
+import { fetchPhotoUrls } from '../../utils/firebase';
 
 import {
   AuthorsList, DashboardMenu
@@ -69,15 +69,13 @@ class Dashboard extends Component {
 		}));
 
 		await Promise.all(this.state.listings.map(async listing => {
-			console.info('listing is', listing);
 			const photoUrls = await fetchPhotoUrls(listing._id, listing.imageNames);
 			const photoUrl = photoUrls.length ? photoUrls[0] :  'https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png';
 
-			console.info('photoUrl is', photoUrl);
 			this.setState({
 				photoUrls: [...this.state.photoUrls, photoUrl]
 			});
-		}));
+		})).catch(console.error);
 
 		await Promise.all(user.wishlist.map(async id => {
 			const bookObj = await booksApi.get({ id });
@@ -127,9 +125,9 @@ class Dashboard extends Component {
 	async navigateToBookSearch(query) {
 		console.log(query);
 		this.props.history.push({
-  			pathname: `/listings/`,
-  			state: { query: query }
-		})
+			pathname: '/listings',
+			search: `?query=${query}&exact=true`
+		});
 	}
 	async addBookToWishlist () {
 		let newBook = this.state.books.find(o => o._id === this.state.wishlistBookId);
