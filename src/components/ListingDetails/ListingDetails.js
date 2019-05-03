@@ -64,8 +64,8 @@ class ListingDetails extends React.Component {
                   </div>
                 </Flex>
                 <Isbn> ISBN: {this.state.listing.book.isbn}</Isbn>
-                <div class="interested"> Interested in {this.state.listing.assignedUser.displayName}'s listing?
-                 <a class="link" href={'mailto:'+ this.state.listing.assignedUser.email + '?subject=UIUC TEXTBOOK EXCHANGE - Interested in your book '+ this.state.listing.book.title}>Contact them !</a>
+                <div class="interested"> Interested in this listing?
+                 <a class="link" href={'mailto:'+ this.state.listing.assignedUser.email + '?subject=UIUC TEXTBOOK EXCHANGE - Interested in your book '+ this.state.listing.book.title}>Contact {this.state.listing.assignedUser.displayName} !</a>
                 </div>
             </Flex>
           </Flex>
