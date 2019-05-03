@@ -199,7 +199,7 @@ class CreateListing extends Component {
         }
         newListing.bookId = book._id;
       }
-      if (!this.state.selectedFromDropdownTrade && !this.state.cashOnly) {
+      if (!this.state.selectedFromDropdownTrade && this.state.exchangeBookChecked) {
         let tradebook = {};
         tradebook = this.checkIfBookExists(this.state.newTradeBookFormISBN);
         if (tradebook == null) {
