@@ -16,6 +16,12 @@ export const SearchContainer = styled.div`
     border: none!important;
     overflow-x: scroll;
 
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
     & > .segments, .segment {
       border-radius: 0px;
     }
