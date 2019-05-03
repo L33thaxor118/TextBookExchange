@@ -33,7 +33,7 @@ export const fetchPhotoUrls = async (listingId, imageNames) => {
   
   await Promise.all(imageNames.map(name => {
     const imageRef = storageRef.child(listingId + '/' + name);
-    return imageRef.getDownloadURL().then(photoUrls.push);
+    return imageRef.getDownloadURL().then(photoUrls.push.bind(photoUrls));
   }));
   
   return photoUrls;

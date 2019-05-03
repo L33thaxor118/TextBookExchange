@@ -8,6 +8,8 @@ export const SearchContainer = styled.div`
   padding-left: 30px;
   padding-right: 30px;
   margin-top: 30px;
+  margin-left: 60px;
+  margin-right: 60px;
 
   & .segment.bottom {
     padding: 0px;
@@ -16,6 +18,10 @@ export const SearchContainer = styled.div`
     & > .segments, .segment {
       border-radius: 0px;
     }
+  }
+
+  & .search.icon {
+    width: 30px;
   }
 `;
 

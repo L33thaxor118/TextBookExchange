@@ -112,7 +112,9 @@ export const createUser = userObject => async dispatch => {
 
 export const login = ({ email, password }) => async dispatch => {
   try {
-    const { user } = await authentication.signInWithEmailAndPassword(email, password);
+    const { user: firebaseUser } = await authentication.signInWithEmailAndPassword(email, password);
+    const { user } = await usersApi.get({ id: firebaseUser.uid });
+
     dispatch({
       type: LOGIN.SUCCESS,
       user,
