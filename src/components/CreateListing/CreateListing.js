@@ -1,9 +1,9 @@
-import { Button, Form, Dropdown, Checkbox, Message} from 'semantic-ui-react';
+import { Button, Form, Message} from 'semantic-ui-react';
 import React, { Component } from 'react';
 
 import axios from 'axios';
 import _ from 'lodash';
-import { CreateListingContainer } from './CreateListing.styled';
+import { CreateListingContainer, StyledFormSelect, UploadTrigger, CheckboxField } from './CreateListing.styled';
 import SelectBook from './SelectBook/SelectBook'
 import { authentication } from '../../utils/firebase'
 import { connect } from 'react-redux';
@@ -47,7 +47,6 @@ class CreateListing extends Component {
       modalOpen: false,
       listingId: ""
     }
-    this.uppyRef = React.createRef();
     this.bookOptions = [];
     this.finish = this.finish.bind(this);
     this.handleFileAdded = this.handleFileAdded.bind(this);
@@ -386,7 +385,7 @@ class CreateListing extends Component {
     newList.splice(idx, 1);
     this.setState({
       imageNames: newList
-    }, ()=>{console.log(this.state.imageNames)});
+    });
   }
 
   handleFileAdded({name}) {
@@ -394,7 +393,7 @@ class CreateListing extends Component {
     if (found !== undefined) return;
     this.setState({
       imageNames: [...this.state.imageNames, name]
-    }, ()=>{console.log(this.state.imageNames)});
+    });
   }
 
   cashChecked(event, {checked}) {
@@ -417,106 +416,118 @@ class CreateListing extends Component {
 
   render() {
     var bookOptions = this.props.books.map( book => ({isbn: book.isbn, title: book.title, authors: book.authors, id: book._id }) )
-    var exchangeBook = null;
-    if (this.state.exchangeBookChecked) {
-      exchangeBook = (
-        <SelectBook bookOptions = {bookOptions}
-          removeIsbnError = {this.removeIsbnErrorTrade}
-          bookCreationHandler = {this.openModal}
-          displayTitle = {this.state.displayTradeBookTitle}
-          onRadioButtonChange = {this.radioButtonChanged}
-          name = {"tradeFor"}
-          bookSelected = {this.tradeBookSelected}
-          loading = {this.state.tradeIsbnLoading}
-          createBookFormISBNChanged = {this.createTradeBookFormISBNChanged}
-          createBookHasFailed = {this.state.tradeIsbnNotFound}
-          selectedFromDropdown = {this.state.selectedFromDropdownTrade}/>
-      );
-    }
-    var cashInput = null;
-    if (this.state.cashChecked) {
-      cashInput = (
-        <Form.Input onChange={this.priceChanged} label="Price" placeholder="$"/>
-      );
-    }
+    
     return (
       <CreateListingContainer>
-        <h1>Create a new Listing</h1>
+        <h1>Create a New Listing</h1>
         <div className='background'>
-          <div className={'offer'}>
-            <SelectBook bookOptions = {bookOptions}
-              removeIsbnError = {this.removeIsbnError}
-              bookCreationHandler= {this.openModal}
-              onRadioButtonChange = {this.radioButtonChanged}
-              displayTitle = {this.state.displayBookTitle}
-              name = {"Offer"}
-              bookSelected = {this.bookSelected}
-              loading = {this.state.isbnLoading}
+          <Form>
+            <SelectBook
+              bookOptions={bookOptions}
+              removeIsbnError={this.removeIsbnError}
+              bookCreationHandler={this.openModal}
+              onRadioButtonChange={this.radioButtonChanged}
+              displayTitle={this.state.displayBookTitle}
+              name='Offer'
+              bookSelected={this.bookSelected}
+              loading={this.state.isbnLoading}
               createBookFormISBNChanged = {this.createBookFormISBNChanged}
-              createBookHasFailed = {this.state.isbnNotFound}
-              selectedFromDropdown = {this.state.selectedFromDropdown}/>
-            <div className="offerForm">
-              <Dropdown
-                  placeholder='Select condition'
-                  fluid
-                  search
-                  selection
-                  options={conditionOptions}
-                  onChange={this.conditionSelected}
-              />
-              <Message error
-                hidden={!(this.state.errors.emptyBook)}>
-                Please select a valid book
-              </Message>
-              <Message error
-                hidden={!(this.state.errors.emptyCondition)}>
-                Please enter your book's condition
-              </Message>
-            </div>
-          </div>
-          <div className="createListingDescription">
-            <Form>
-              <Form.Field>
-                <h2>Description</h2>
-                <Form.TextArea className={'description'}
-                  placeholder='describe the book here'
-                  onChange={this.descriptionChanged}/>
-              </Form.Field>
-            </Form>
-            <h2>Upload Images</h2>
+              createBookHasFailed={this.state.isbnNotFound}
+              selectedFromDropdown={this.state.selectedFromDropdown}
+            />
+            <StyledFormSelect
+              placeholder='Condition'
+              label='Condition'
+              fluid
+              search
+              selection
+              options={conditionOptions}
+              onChange={this.conditionSelected}
+            />
+            <Message
+              error
+              hidden={!this.state.errors.emptyBook}
+              content='Please select a valid book'
+            />
+            <Message
+              error
+              hidden={!this.state.errors.emptyCondition}
+              content="Please enter your book's condition"
+            />
+            <Form.TextArea
+              label='Description'
+              className='description'
+              onChange={this.descriptionChanged}
+              placeholder='Provide a brief description of the book and its condition'
+            />
             <ImageUpload
               listingId={this.state.listingId}
-              trigger = {({ onClick }) =>
-                <Button color='teal' size='massive' icon='upload' onClick={onClick}></Button>}
+              trigger={({ onClick }) => (
+                <UploadTrigger active={this.state.imageNames.length}>
+                  <Form.Button
+                    label='Upload Images'
+                    size='massive'
+                    icon='upload'
+                    onClick={onClick}
+                  />
+                </UploadTrigger>
+              )}
               ref={el => this.uppyRef = el}
               onFileAdded={this.handleFileAdded}
-              onFileRemoved={this.handleFileRemoved}/>
-          </div>
-          <div className={'tradeFor'}>
-            <h2>Exchange for</h2>
-            <Checkbox label='Cash' onChange={this.cashChecked} />
-            <Checkbox label='Book' onChange={this.exchangeBookChecked} />
-            {cashInput}
-            {exchangeBook}
-            <Message error
-              hidden={!(this.state.errors.emptyExchangeBook)}>
-              Please select a valid book
-            </Message>
-            <Message error
-              hidden={!(this.state.errors.emptyCash)}>
-              You selected cash. Please specify a price
-            </Message>
-            <Message error
-              hidden={!(this.state.errors.emptyExchange)}>
-              Please select at least one option
-            </Message>
-          </div>
+              onFileRemoved={this.handleFileRemoved}
+            />
+            {/* Inline styles because I don't feel like making another styled component lol */}
+            <div style={{
+              fontWeight: 'bold',
+              fontSize: '14px',
+              marginTop: '15px',
+              marginBottom: '10px'
+            }}>
+              Exchange for
+            </div>
+            <CheckboxField active={this.state.cashChecked}>
+              <Form.Checkbox label='Cash' onChange={this.cashChecked} />
+              {this.state.cashChecked && (
+                <Form.Input inline onChange={this.priceChanged} label="Price" placeholder="$"/>
+              )}
+            </CheckboxField>
+            <CheckboxField active={this.state.exchangeBookChecked}>
+              <Form.Checkbox label='Book' onChange={this.exchangeBookChecked} />
+              {this.state.exchangeBookChecked && (
+                <SelectBook
+                  bookOptions={bookOptions}
+                  removeIsbnError={this.removeIsbnErrorTrade}
+                  bookCreationHandler={this.openModal}
+                  displayTitle={this.state.displayTradeBookTitle}
+                  onRadioButtonChange={this.radioButtonChanged}
+                  name='tradeFor'
+                  bookSelected={this.tradeBookSelected}
+                  loading={this.state.tradeIsbnLoading}
+                  createBookFormISBNChanged={this.createTradeBookFormISBNChanged}
+                  createBookHasFailed={this.state.tradeIsbnNotFound}
+                  selectedFromDropdown={this.state.selectedFromDropdownTrade}
+                />
+              )}
+            </CheckboxField>
+          </Form>
           <Message error
-            hidden={!(this.state.errors.internal)}>
-            Internal error. Please try again later
+            hidden={!(this.state.errors.emptyExchangeBook)}>
+            Please select a valid book
+          </Message>
+          <Message error
+            hidden={!(this.state.errors.emptyCash)}>
+            You selected cash. Please specify a price
+          </Message>
+          <Message error
+            hidden={!(this.state.errors.emptyExchange)}>
+            Please select at least one option
           </Message>
           <Button type='submit' color='blue' onClick={this.clearErrors}>Create</Button>
         </div>
+        <Message error
+          hidden={!(this.state.errors.internal)}>
+          Internal error. Please try again later
+        </Message>
       </CreateListingContainer>
     );
   }
