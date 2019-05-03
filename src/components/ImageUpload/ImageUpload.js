@@ -14,6 +14,7 @@ class ImageUpload extends React.Component {
 
   constructor(props) {
     super(props);
+    const noop = () => {};
 
     this.uppy = Uppy({
       allowMultipleUploads: false,
@@ -31,6 +32,9 @@ class ImageUpload extends React.Component {
         return updatedFiles;
       }
     }).use(FirebaseCloudStorage, { storageRef: storage.ref() });
+
+    this.uppy.on('file-added', props.onFileAdded || noop);
+    this.uppy.on('file-removed', props.onFileRemoved || noop);
   }
   
   componentWillUnmount() {
