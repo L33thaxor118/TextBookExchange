@@ -1,4 +1,4 @@
-import * as firebase from 'firebase';
+import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/storage';
 
@@ -18,27 +18,35 @@ export const storage = firebase.storage();
 
 export const uploadPhotos = async (listingId, imageFiles) => {
   let storageRef = storage.ref();
-  for (let i = 0; i < imageFiles.length; i++) {
-    let imageFile = imageFiles[i];
-    let imgref = storageRef.child(listingId + '/' + imageFile.name);
-    await imgref.put(imageFile).then((snapshot)=>{
-      console.log('Uploaded a blob or file!');
-    }).catch((error)=>{return error;});
-  }
+
+  await Promise.all(imageFiles.map(file => {
+    const imageRef = storageRef.child(listingId + '/' + file.name);
+    return imageRef.put(file);
+  }));
+
   return "success";
 };
 
 export const fetchPhotoUrls = async (listingId, imageNames) => {
-  var photoUrls = [];
+  const photoUrls = [];
   let storageRef = storage.ref();
-  for (let i = 0 ; i < imageNames.length; i++) {
-    let imageRef = storageRef.child(listingId + '/' + imageNames[i]);
-    try { photoUrls.push(await imageRef.getDownloadURL()); }
-    catch(err) {return err}
-  }
+
+  await Promise.all(imageNames.map(name => {
+    const imageRef = storageRef.child(listingId + '/' + name);
+    return imageRef.getDownloadURL().then((url)=>{photoUrls.push(url)});
+  }));
+
   return photoUrls;
 };
 
-export const deleteListingPhotos = (listingId) => {
+export const deleteListingPhotos = async (listingId, imageNames) => {
+  let storageRef = storage.ref();
+
+  await Promise.all(imageNames.map(name => {
+    const imageRef = storageRef.child(listingId + '/' + name);
+    return imageRef.delete();
+  })).catch((error)=>{return error;});
+
+  return "success";
 
 };

@@ -1,22 +1,31 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 
+import { Loader } from 'semantic-ui-react';
+import { Flex } from '@rebass/grid';
+
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faExchangeAlt } from '@fortawesome/free-solid-svg-icons'
+import { faExchangeAlt, faUpload, faPlus} from '@fortawesome/free-solid-svg-icons'
 import UserAuthentication from './components/SignIn';
 import CreateListing from './components/CreateListing';
 import ListingDetails from './components/ListingDetails';
+import ModifyListing from './components/ModifyListing';
 import Search from './components/Search';
 import Dashboard from './components/Dashboard';
-
+import Home from './components/Home';
 import Header from './components/Header';
 
 // Stylesheets
 import './App.css';
 import 'semantic-ui-css/semantic.css';
-import { authentication } from './utils/firebase';
+
+// Redux
+import { loadUserState } from './redux/reducers/userReducer';
 
 library.add(faExchangeAlt);
+library.add(faUpload);
+library.add(faPlus)
 
 //Source for ProtectedRoute:
 //https://medium.com/@leonardobrunolima/react-tips-how-to-protect-routes-for-unauthorized-access-with-react-router-v4-73c0d451e0a2
@@ -41,36 +50,54 @@ const ProtectedRoute = ({ component: Component, currentUser, ...rest }) => (
   </>
 );
 
-class App extends Component {
-  state = {};
+export class App extends Component {
+  state = {
+    listingId: null,
+  };
 
   async componentDidMount() {
-    // TODO: move this to Redux
-    authentication.onAuthStateChanged(user => this.setState({ user }))
+    await this.props.loadUserState();
   }
 
   render() {
-    return (
+    const { currentUser, isLoginStateResolved } = this.props;
+
+    return isLoginStateResolved ? (
       <Router>
-        <Header />
-        <div className='pageContainer'>
-          <Switch>
-            <Route exact path='/login' component={UserAuthentication}/>
-            <ProtectedRoute exact path='/listings' component={Search} currentUser={this.state.user} />
-            <ProtectedRoute
-              exact
-              path='/listings/new'
-              component={CreateListing}
-              currentUser={this.state.user}
-            />
-            <ProtectedRoute path='/listings/:id' component={ListingDetails} currentUser={this.state.user} />
-            <ProtectedRoute path='/dashboard' component={Dashboard} currentUser={this.state.user} />
-          </Switch>
-        </div>
+        <Route exact path='/login' component={UserAuthentication}/>
+        <Route>
+          <div className='pageContainer'>
+            <Header />
+            <Switch>
+              <ProtectedRoute exact path='/' component={Home} currentUser={currentUser} />
+              <ProtectedRoute exact path='/dashboard' component={Dashboard} currentUser={currentUser} />
+              <ProtectedRoute exact path='/listings' component={Search} currentUser={currentUser} />
+              <Route
+                exact
+                path='/listings/new'
+                component={CreateListing}
+                currentUser={currentUser}
+              />
+              <Route path='/listings/modify/:id' component ={ModifyListing} currentUser={currentUser} />
+              <ProtectedRoute path='/listings/:id' component={ListingDetails} currentUser={currentUser} />
+            </Switch>
+          </div>
+        </Route>
       </Router>
+    ) : (
+      <Flex alignItems='center' style={{height: '100vh'}}>
+        <Loader active inline='centered' content='Loading' />
+      </Flex>
     );
   }
 }
 
-
-export default App;
+export default connect(
+  state => ({
+    currentUser: state.loginState.user,
+    isLoginStateResolved: state.loginState.isLoginStateResolved,
+  }),
+  dispatch => ({
+    loadUserState: () => dispatch(loadUserState()),
+  })
+)(App);

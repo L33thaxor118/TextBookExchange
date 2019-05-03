@@ -1,26 +1,99 @@
 /**
 @author Srilakshmi Prasad
 **/
-import React, { Component } from 'react'
-import { Segment, Menu, Icon, Popup } from 'semantic-ui-react';
+import React, { useState, useEffect, useRef } from 'react'
+import { Segment, Menu, Icon } from 'semantic-ui-react';
 import Fuse from 'fuse.js';
 
 import SearchResults from './SearchResults';
+import FilterPopup from './FilterPopup';
 
-import { StyledSearch, CreateListingButton, SearchContainer } from './Search.styled';
+import { StyledSearch, MenuButton, SearchContainer } from './Search.styled';
 
 import listingsApi from '../../api/listings';
 
-class Search extends Component {
-  // maintain query in state and search results
-  state = {
-    query: '',
-    // currently contains mock JSON objects
-    results: [],
-    listings: null,
+const useEffectSkipFirst = (fn, arr) => {
+  const isFirst = useRef(true);
+
+  useEffect(() => {
+    if (isFirst.current) {
+      isFirst.current = false;
+      return;
+    }
+
+    fn();
+  }, arr);
+};
+
+const useEffectOnAll = (fn, arr) => {
+  arr.forEach(value => {
+    useEffectSkipFirst(fn, [value]);
+  });
+};
+
+const Search = ({ location, history }) => {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [filteredResults, setFilteredResults] = useState([]);
+  const [listings, setListings] = useState();
+  const [filterOptions, setFilterOptions] = useState();
+  const [fuse, setFuse] = useState();
+
+  const filterListings = query => fuse ? fuse.search(query) : [];
+
+  const createFilterFnFromOptions = filterOptions => {
+    const { priceRange, conditions, max } = filterOptions;
+    
+    let [lowerBoundPrice, upperBoundPrice] = priceRange;
+    
+    if (upperBoundPrice === max) {
+      upperBoundPrice = Infinity;
+    }
+
+    const isInPriceRange = price => price >= lowerBoundPrice && price <= upperBoundPrice;
+    const hasCondition = condition => conditions.has(condition.toLowerCase());
+
+    return listing => isInPriceRange(listing.price) && hasCondition(listing.condition);
   };
 
-  async componentDidMount() {
+  const handleFilterChange = options => {
+    const filterFn = createFilterFnFromOptions(options);
+    
+    setFilterOptions(options);
+    setFilteredResults(results.filter(filterFn));
+  };
+
+  const handleSearch = (currentQuery = query) => setResults(currentQuery.length > 0 ? filterListings(currentQuery) : []);
+
+  const handleInputChange = event => setQuery(event.target.value);
+  const navigateToListingDetails = ({ _id }) => history.push(`/listings/${_id}`);
+
+  const { isDefaultFilter = true } = filterOptions || {};
+
+  const parseQueryString = () => {
+    const params = new URLSearchParams(location.search);
+    return {
+      query: params.get('query'),
+      exact: params.get('exact') === 'true',
+    };
+  };
+
+  const queryFromSearchParams = () => {
+    if (location.search) {
+      const { query: urlQuery, exact } = parseQueryString();
+      if (urlQuery === query) return;
+
+      setQuery(urlQuery);
+
+      if (!exact) {
+        handleSearch(urlQuery);
+      } else {
+        setResults(listings.filter(listing => listing.book.title === urlQuery));
+      }
+    }
+  };
+
+  useEffect(() => {
     const fuseOptions = {
       shouldSort: true,
       threshold: 0.6,
@@ -36,64 +109,60 @@ class Search extends Component {
       ]
     };
 
-    const { listings } = await listingsApi.get();
-    this.setState({ listings });
-    this.fuse = new Fuse(listings, fuseOptions);
-  }
-
-  // Filter array items based on search criteria (title)
-  // Fuzzy search over book title AND authors
-  filterListings = query => this.fuse ? this.fuse.search(query) : [];
-
-  // redraws component on state change
-  handleInputChange = event => {
-    const query = event.target.value;
-    this.setState({
-      results: query.length > 0 ? this.filterListings(query) : []
+    listingsApi.get().then(({ listings }) => {
+      setListings(listings);
+      setFuse(new Fuse(listings, fuseOptions));
     });
-  };
+  }, []);
 
-  navigateToListingDetails = ({ _id }) => this.props.history.push(`/listings/${_id}`);
+  useEffectOnAll(queryFromSearchParams, [fuse, location.search]);
 
-  redirectToCreateListing = () => this.props.history.push('/listings/new');
+  useEffectSkipFirst(() => {
+    if (filterOptions) {
+      handleFilterChange(filterOptions);
+    } else {
+      setFilteredResults(results);
+    }
 
-  // render search results with assistance of Suggestion component 
-  render() {
-    const { results } = this.state;
-    
-    const Trigger = props => <CreateListingButton {...props} />;
+    if (query && parseQueryString().query !== query) {
+      history.push({
+        pathname: '/listings',
+        search: `?query=${query}`
+      });
+    }
+  }, [results]);
 
-    return (
-      <SearchContainer>
-        <Menu attached='top'>
-          <StyledSearch
-            className='aligned grow item transparent'
-            icon='search'
-            iconPosition='left'
-            placeholder='Search listings'
-            onChange={this.handleInputChange}
+  return (
+    <SearchContainer>
+      <Menu attached='top'>
+        <StyledSearch
+          className='aligned grow item transparent'
+          icon='search'
+          iconPosition='left'
+          placeholder='Search listings'
+          onChange={handleInputChange}
+          value={query}
+          onKeyDown={event => event.keyCode === 13 && handleSearch()}
+        />
+        <Menu.Menu position='right'>
+          <MenuButton onClick={handleSearch}>
+            <Icon name='search' />
+          </MenuButton>
+          <FilterPopup
+            hasFilter={!isDefaultFilter}
+            currentOptions={filterOptions}
+            onApplyFilter={handleFilterChange}
           />
-          <Menu.Menu position='right'>
-            <Popup
-              trigger={
-                <Trigger onClick={this.redirectToCreateListing}>
-                  <Icon name='add' />
-                </Trigger>
-              }
-              content='Create a new listing'
-              position='bottom center'
-            />
-          </Menu.Menu>
-        </Menu>
-        <Segment attached='bottom'>
-          <SearchResults
-            results={results}
-            onItemClick={this.navigateToListingDetails}
-          />
-        </Segment>
-      </SearchContainer>
-    )
-  }
-}
+        </Menu.Menu>
+      </Menu>
+      <Segment attached='bottom'>
+        <SearchResults
+          results={filteredResults}
+          onItemClick={navigateToListingDetails}
+        />
+      </Segment>
+    </SearchContainer>
+  );
+};
 
 export default Search;

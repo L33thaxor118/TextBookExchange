@@ -1,15 +1,14 @@
-import { Button, Form, Dropdown, Modal} from 'semantic-ui-react';
+import { Button, Form, Dropdown, Checkbox, Message} from 'semantic-ui-react';
 import React, { Component } from 'react';
 
 import axios from 'axios';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import styles from './CreateListing.css';
-import UploadComponent from './UploadComponent/UploadComponent';
-import PhotoUploadPreview from './PhotoUploadPreview/PhotoUploadPreview';
+import _ from 'lodash';
+import { CreateListingContainer } from './CreateListing.styled';
 import SelectBook from './SelectBook/SelectBook'
-import { authentication, uploadPhotos, fetchPhotoUrls } from '../../utils/firebase'
+import { authentication } from '../../utils/firebase'
 import { connect } from 'react-redux';
-import { get_books, post_book, post_book_failure, post_listing} from '../../redux/actions/index';
+import ImageUpload from '../ImageUpload';
+import { getBooks, createBook, createListing } from '../../redux/actions/index';
 
 const lookupBookByISBN = isbn => axios.get('https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn).then(({ data }) => data);
 
@@ -21,36 +20,39 @@ const conditionOptions = [
     { key: 'used - acceptable', text: 'used - acceptable', value: 'used - acceptable' }
 ];
 
-function createObjectURL(object) {
-    return (window.URL) ? window.URL.createObjectURL(object) : window.webkitURL.createObjectURL(object);
-}
-// function revokeObjectURL(url) {
-//     return (window.URL) ? window.URL.revokeObjectURL(url) : window.webkitURL.revokeObjectURL(url);
-// }
 
 class CreateListing extends Component {
   constructor() {
     super();
     this.state = {
-      imageFileList: [],
+      imageNames: [],
       books: [],
-      selectedFromDropdown: false,
-      selectedFromDropdownTrade: false,
+      selectedFromDropdown: true,
+      selectedFromDropdownTrade: true,
       newListing: {},
 
       newBookFormISBN: "",
+      displayBookTitle: "",
       isbnLoading: false,
       isbnNotFound: false,
 
       newTradeBookFormISBN: "",
+      displayTradeBookTitle: "",
       tradeIsbnLoading: false,
-      tradeIsbnNotFound: false
+      tradeIsbnNotFound: false,
+      cashChecked: false,
+      exchangeBookChecked: false,
+
+      errors:  {},
+      modalOpen: false,
+      listingId: ""
     }
-    //this.books = [];
+    this.uppyRef = React.createRef();
     this.bookOptions = [];
-    this.handleFileDrop = this.handleFileDrop.bind(this);
+    this.finish = this.finish.bind(this);
+    this.handleFileAdded = this.handleFileAdded.bind(this);
     this.handleCreate = this.handleCreate.bind(this);
-    this.handleRemovePhoto = this.handleRemovePhoto.bind(this);
+    this.handleFileRemoved = this.handleFileRemoved.bind(this);
     this.bookSelected = this.bookSelected.bind(this);
     this.tradeBookSelected = this.tradeBookSelected.bind(this);
     this.conditionSelected = this.conditionSelected.bind(this);
@@ -59,35 +61,63 @@ class CreateListing extends Component {
     this.createBookFormISBNChanged = this.createBookFormISBNChanged.bind(this);
     this.createTradeBookFormISBNChanged = this.createTradeBookFormISBNChanged.bind(this);
     this.checkIfBookExists = this.checkIfBookExists.bind(this);
+    this.radioButtonChanged = this.radioButtonChanged.bind(this);
+    this.cashChecked = this.cashChecked.bind(this);
+    this.exchangeBookChecked = this.exchangeBookChecked.bind(this);
+    this.clearErrors = this.clearErrors.bind(this);
+    this.validateListing = this.validateListing.bind(this);
+    this.setInternalError = this.setInternalError.bind(this);
+    this.removeIsbnError = this.removeIsbnError.bind(this);
+    this.removeIsbnErrorTrade = this.removeIsbnErrorTrade.bind(this);
+    this.checkIfCashOnly = this.checkIfCashOnly.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     if (this.props.listing != null) {
       console.log("modify mode")
     }
-    this.props.getData();
+    await this.props.getData();
     const user = authentication.currentUser
     const listing = {
       bookId:"",
-      title: "",
       description: "",
       imageNames: [],
       condition: "",
       price: 0,
       exchangeBook: "",
       userId: user == null ? null : user.uid
+    };
+    const errors = {
+      internal: false,
+      emptyExchangeBook: false,
+      emptyBook: false,
+      emptyCash: false,
+      emptyCondition: false,
+      emptyExchange: false
     }
     this.setState({
       books: this.props.books,
-      newListing: listing
+      newListing: listing,
+      errors: errors
     });
   }
 
-  handleRemovePhoto(idx) {
-    let newList = this.state.imageFileList;
-    newList.splice(idx, 1);
+  checkIfCashOnly(){
+    if (this.state.cashChecked && !this.state.exchangeBookChecked) return true;
+    else return false;
+  }
+
+  removeIsbnError() {
     this.setState({
-      imageFileList: newList
+      displayBookTitle: "",
+      isbnNotFound: false
+    });
+  }
+
+  removeIsbnErrorTrade() {
+    this.setState({
+      displayTradeBookTitle: "",
+      tradeIsbnNotFound: false
     });
   }
 
@@ -98,91 +128,177 @@ class CreateListing extends Component {
     return null;
   }
 
-async handleCreate() {
+  setInternalError() {
+    let errors = this.state.errors;
+    errors.internal = true;
+    this.setState({errors: errors});
+    setTimeout(this.clearErrors, 6000);
+  }
+
+  validateListing() {
+    let errors = this.state.errors;
     let newListing = this.state.newListing;
-    if (this.state.isbnNotFound && !this.state.selectedFromDropdown) return;
-    if (this.state.tradeIsbnNotFound && !this.state.selectedFromDropdownTrade) return;
-    this.props.setBookCreateFailure(false);
+    if (!this.state.cashChecked && !this.state.exchangeBookChecked) {
+      errors.emptyExchange = true;
+    }
+    if (this.state.selectedFromDropdown && newListing.bookId === ""){
+      errors.emptyBook = true;
+    }
+    if (!this.state.selectedFromDropdown && this.state.displayBookTitle === ""){
+      errors.emptyBook = true;
+    }
+    if ((this.state.selectedFromDropdownTrade && newListing.exchangeBook === "")
+          && this.state.exchangeBookChecked){
+      errors.emptyExchangeBook = true;
+    }
+    if ((!this.state.selectedFromDropdownTrade &&
+          this.state.displayTradeBookTitle === "") && this.state.exchangeBookChecked){
+      errors.emptyExchangeBook = true;
+    }
+    if (newListing.price === 0 && this.state.cashChecked) {
+      errors.emptyCash = true;
+    }
+    if (newListing.condition === "") {
+      errors.emptyCondition = true;
+    }
+    this.setState({errors:errors});
+    for (let key in errors) {
+      if (errors[key] === true) {
+          return true;
+      }
+    }
+    return false;
+  }
 
-    if (!this.state.selectedFromDropdown) {
-      let book = {};
-      book = this.checkIfBookExists(this.state.newBookFormISBN);
-      if (book == null) {
-        book = await this.props.createBook({isbn: this.state.newBookFormISBN});
-      }
-      newListing.bookId = book._id;
-      newListing.title = book.title;
+
+  async handleCreate() {
+    if (this.validateListing()) {
+      return;
     }
-    if (!this.state.selectedFromDropdownTrade) {
-      let tradebook = {};
-      tradebook = this.checkIfBookExists(this.state.newTradeBookFormISBN);
-      if (tradebook == null) {
-        tradebook = await this.props.createBook({isbn: this.state.newTradeBookFormISBN});
+    let newListing = this.state.newListing;
+    if (this.state.cashOnly) newListing.exchangeBook = "";
+    try{
+      if (!this.state.selectedFromDropdown) {
+        let book = {};
+        book = this.checkIfBookExists(this.state.newBookFormISBN);
+        if (book == null) {
+          book = await this.props.createBook({isbn: this.state.newBookFormISBN});
+        }
+        newListing.bookId = book._id;
       }
-      newListing.exchangeBook = tradebook._id;
+      if (!this.state.selectedFromDropdownTrade && this.state.exchangeBookChecked) {
+        let tradebook = {};
+        tradebook = this.checkIfBookExists(this.state.newTradeBookFormISBN);
+        if (tradebook == null) {
+          tradebook = await this.props.createBook({isbn: this.state.newTradeBookFormISBN});
+        }
+        newListing.exchangeBook = tradebook._id;
+      }
+    } catch(error) {
+        this.setInternalError();
+        return;
     }
-    newListing.imageNames = this.state.imageFileList.map(file => (file.name));
+
+    newListing.imageNames = this.state.imageNames;
     console.log(newListing);
-    delete newListing.title;
-    let createdListing = await this.props.createListing(newListing);
-    if (createdListing !== undefined) await uploadPhotos(createdListing._id, this.state.imageFileList);
-    console.log(await fetchPhotoUrls(createdListing._id, createdListing.imageNames));
-  }
-
-  tradeBookSelected(event, data) {
-    const { value } = data;
-    const updatedListing = this.state.newListing;
-    updatedListing.exchangeBook = "";
-    if (value === "None") {
-      this.setState({
-        newListing: updatedListing,
-        selectedFromDropdownTrade: false
-      })
-    } else {
-      const updatedListing = this.state.newListing;
-      updatedListing.exchangeBook = value;
-      this.setState({
-        newListing: updatedListing,
-        selectedFromDropdownTrade: true
-      });
-    }
-  }
-
-  bookSelected(event, data) {
-    const { value } = data;
-    const updatedListing = this.state.newListing;
-    updatedListing.bookId = "";
-    updatedListing.title = "";
-    if (value === "None") {
-      this.setState({
-        newListing: updatedListing,
-        selectedFromDropdown: false
-      })
-    } else {
-      const { text } = data.options.find(o => o.value === value);
-      const updatedListing = this.state.newListing;
-      updatedListing.bookId = value;
-      updatedListing.title = text;
-      this.setState({
-        newListing: updatedListing,
-        selectedFromDropdown: true
-      });
-    }
-  }
-
-  async createBookFormISBNChanged(event) {
-    this.setState({
-      newBookFormISBN: event.target.value,
-      isbnLoading: true,
-      isbnNotFound: false
-    });
     try {
-      let response = await lookupBookByISBN(event.target.value);
-      let notFound = false;
-      if (response.totalItems < 1) notFound = true;
+      if (this.checkIfCashOnly()) delete newListing.exchangeBook;
+      let createdListing = await this.props.createListing(newListing);
+      this.setState({listingId: createdListing._id}, ()=> {this.finish()});
+    } catch(error) {
+      this.setInternalError();
+      return;
+    }
+  }
+
+  async finish() {
+    console.log(this.state.listingId);
+    await this.uppyRef.upload();
+    this.props.history.push('/listings/' + this.state.listingId);
+  }
+
+  clearErrors(){
+    let errors = this.state.errors;
+    errors = _.mapValues(errors, () => false);
+    this.setState({errors: errors}, ()=>{this.handleCreate()});
+  }
+
+  radioButtonChanged(buttonVal) {
+    let listing = this.state.newListing;
+    switch(buttonVal) {
+      case "isbnOffer":
+      listing.bookId = "";
+      this.setState({ newListing: listing, selectedFromDropdown: false});
+      break;
+
+      case "dropdownOffer":
+      this.setState({ selectedFromDropdown: true, isbnLoading:false});
+      break;
+
+      case "isbntradeFor":
+      listing.exchangeBook = "";
+      this.setState({ newListing: listing, selectedFromDropdownTrade: false });
+      break;
+
+      case "dropdowntradeFor":
+      this.setState({ selectedFromDropdownTrade: true, tradeIsbnLoading:false });
+      break;
+
+      default:
+    }
+  }
+
+  tradeBookSelected(event, {result}) {
+    const updatedListing = this.state.newListing;
+    updatedListing.exchangeBook = result.id;
+    let errors = this.state.errors;
+    errors.emptyExchangeBook= false;
+    this.setState({
+      newListing: updatedListing,
+      errors: errors
+    });
+  }
+
+  bookSelected(event, {result}) {
+    const updatedListing = this.state.newListing;
+    updatedListing.bookId = result.id;
+    let errors = this.state.errors;
+    errors.emptyBook= false;
+    this.setState({
+      newListing: updatedListing,
+      errors: errors
+    });
+  }
+
+  async createBookFormISBNChanged(isbn) {
+    let digits = isbn.length;
+    if (digits === 0) return;
+    let errors = this.state.errors;
+    errors.emptyBook= false;
+    this.setState({
+      newBookFormISBN: isbn,
+      isbnLoading: digits? true : false,
+      isbnNotFound: false,
+      displayBookTitle: "",
+      errors: errors
+    });
+    let book = this.checkIfBookExists(isbn);
+    if (book != null) {
       this.setState({
         isbnLoading: false,
-        isbnNotFound: notFound
+        isbnNotFound: false,
+        displayBookTitle: book.title + " by " + book.authors
+      });
+      return;
+    }
+    try {
+      let response = await lookupBookByISBN(isbn);
+      let title = response.items[0].volumeInfo.title;
+      let authors = response.items[0].volumeInfo.authors;
+      this.setState({
+        isbnLoading: false,
+        isbnNotFound: false,
+        displayBookTitle: title + " by " + authors
       });
     } catch {
       this.setState({
@@ -192,19 +308,34 @@ async handleCreate() {
     }
   }
 
-  async createTradeBookFormISBNChanged(event) {
+  async createTradeBookFormISBNChanged(isbn) {
+    let digits = isbn.length;
+    if (digits === 0) return;
+    let errors = this.state.errors;
+    errors.emptyExchangeBook= false;
     this.setState({
-      newTradeBookFormISBN: event.target.value,
-      tradeIsbnLoading: true,
-      tradeIsbnNotFound: false
+      newTradeBookFormISBN: isbn,
+      tradeIsbnLoading: digits? true : false,
+      tradeIsbnNotFound: false,
+      displayTradeBookTitle: "",
+      errors: errors
     });
-    try {
-      let response = await lookupBookByISBN(event.target.value);
-      let notFound = false;
-      if (response.totalItems < 1) notFound = true;
+    let book = this.checkIfBookExists(isbn);
+    if (book != null) {
       this.setState({
         tradeIsbnLoading: false,
-        tradeIsbnNotFound: notFound
+        tradeIsbnNotFound: false,
+        displayTradeBookTitle: book.title
+      });
+      return;
+    }
+    try {
+      let response = await lookupBookByISBN(isbn);
+      let title = response.items[0].volumeInfo.title;
+      this.setState({
+        tradeIsbnLoading: false,
+        tradeIsbnNotFound: false,
+        displayTradeBookTitle: title
       });
     } catch {
       this.setState({
@@ -226,112 +357,184 @@ async handleCreate() {
   conditionSelected(event, {value}) {
     const updatedListing = this.state.newListing;
     updatedListing.condition = value;
+    let errors = this.state.errors;
+    errors.emptyCondition= false;
     this.setState({
-      newListing: updatedListing
+      newListing: updatedListing,
+      errors: errors
     });
   }
 
   priceChanged(event){
     const updatedListing = this.state.newListing;
     updatedListing.price = parseInt(event.target.value);
+    let errors = this.state.errors;
+    errors.emptyCash= false;
     this.setState({
-      newlisting: updatedListing
+      newlisting: updatedListing,
+      errors: errors
     });
   }
 
-  handleFileDrop(fileList) {
+  handleFileRemoved({name}) {
+    let idx = 0;
+    let newList = this.state.imageNames;
+    for (let i = 0; i < newList.length; i++) {
+      if (newList[i] === name) break;
+      idx++;
+    }
+    newList.splice(idx, 1);
     this.setState({
-      imageFileList: [...this.state.imageFileList, fileList[0]]
+      imageNames: newList
+    }, ()=>{console.log(this.state.imageNames)});
+  }
+
+  handleFileAdded({name}) {
+    let found = this.state.imageNames.find(imgName=>{return imgName === name});
+    if (found !== undefined) return;
+    this.setState({
+      imageNames: [...this.state.imageNames, name]
+    }, ()=>{console.log(this.state.imageNames)});
+  }
+
+  cashChecked(event, {checked}) {
+    let errors = this.state.errors;
+    errors.emptyExchange= false;
+    this.setState({
+      cashChecked: checked,
+      errors: errors
+    });
+  }
+
+  exchangeBookChecked(event, {checked}) {
+    let errors = this.state.errors;
+    errors.emptyExchange= false;
+    this.setState({
+      exchangeBookChecked: checked,
+      errors: errors
     });
   }
 
   render() {
-    var imageContainers = [];
-    var imageFiles = this.state.imageFileList;
-    for (let i = 0; i < imageFiles.length; i++) {
-      imageContainers.push(
-          <PhotoUploadPreview removePhoto={this.handleRemovePhoto} photo={createObjectURL(imageFiles[i])} idx = {i}/>
-        );
+    var bookOptions = this.props.books.map( book => ({isbn: book.isbn, title: book.title, authors: book.authors, id: book._id }) )
+    var exchangeBook = null;
+    if (this.state.exchangeBookChecked) {
+      exchangeBook = (
+        <SelectBook bookOptions = {bookOptions}
+          removeIsbnError = {this.removeIsbnErrorTrade}
+          bookCreationHandler = {this.openModal}
+          displayTitle = {this.state.displayTradeBookTitle}
+          onRadioButtonChange = {this.radioButtonChanged}
+          name = {"tradeFor"}
+          bookSelected = {this.tradeBookSelected}
+          loading = {this.state.tradeIsbnLoading}
+          createBookFormISBNChanged = {this.createTradeBookFormISBNChanged}
+          createBookHasFailed = {this.state.tradeIsbnNotFound}
+          selectedFromDropdown = {this.state.selectedFromDropdownTrade}/>
+      );
     }
-    var bookOptions = this.props.books.map( book => ({key: book.isbn, text: book.title, value: book._id }) )
-    bookOptions.unshift({key: "no_select", text: "use ISBN", value: "None" })
-
+    var cashInput = null;
+    if (this.state.cashChecked) {
+      cashInput = (
+        <Form.Input onChange={this.priceChanged} label="Price" placeholder="$"/>
+      );
+    }
     return (
-      <div className={styles.container}>
-        <div className={styles.exchange}>
-          <div className={styles.offer}>
-          <h1>What you've got</h1>
-          <SelectBook bookOptions = {bookOptions}
-            bookSelected = {this.bookSelected}
-            loading = {this.state.isbnLoading}
-            createBookFormISBNChanged = {this.createBookFormISBNChanged}
-            createBookHasFailed = {this.state.isbnNotFound}
-            selectedFromDropdown = {this.state.selectedFromDropdown}/>
+      <CreateListingContainer>
+        <h1>Create a new Listing</h1>
+        <div className='background'>
+          <div className={'offer'}>
+            <SelectBook bookOptions = {bookOptions}
+              removeIsbnError = {this.removeIsbnError}
+              bookCreationHandler= {this.openModal}
+              onRadioButtonChange = {this.radioButtonChanged}
+              displayTitle = {this.state.displayBookTitle}
+              name = {"Offer"}
+              bookSelected = {this.bookSelected}
+              loading = {this.state.isbnLoading}
+              createBookFormISBNChanged = {this.createBookFormISBNChanged}
+              createBookHasFailed = {this.state.isbnNotFound}
+              selectedFromDropdown = {this.state.selectedFromDropdown}/>
+            <div className="offerForm">
+              <Dropdown
+                  placeholder='Select condition'
+                  fluid
+                  search
+                  selection
+                  options={conditionOptions}
+                  onChange={this.conditionSelected}
+              />
+              <Message error
+                hidden={!(this.state.errors.emptyBook)}>
+                Please select a valid book
+              </Message>
+              <Message error
+                hidden={!(this.state.errors.emptyCondition)}>
+                Please enter your book's condition
+              </Message>
+            </div>
           </div>
-          <FontAwesomeIcon className={styles.icon} icon="exchange-alt" size="3x"/>
-          <div className={styles.tradeFor}>
-          <h1>What you're looking for</h1>
-          <SelectBook bookOptions = {bookOptions}
-            bookSelected = {this.tradeBookSelected}
-            loading = {this.state.tradeIsbnLoading}
-            createBookFormISBNChanged = {this.createTradeBookFormISBNChanged}
-            createBookHasFailed = {this.state.tradeIsbnNotFound}
-            selectedFromDropdown = {this.state.selectedFromDropdownTrade}/>
-          <Form.Input onChange={this.priceChanged} label="I also/only want Cash" placeholder="$"/>
+          <div className="createListingDescription">
+            <Form>
+              <Form.Field>
+                <h2>Description</h2>
+                <Form.TextArea className={'description'}
+                  placeholder='describe the book here'
+                  onChange={this.descriptionChanged}/>
+              </Form.Field>
+            </Form>
+            <h2>Upload Images</h2>
+            <ImageUpload
+              listingId={this.state.listingId}
+              trigger = {({ onClick }) =>
+                <Button color='teal' size='massive' icon='upload' onClick={onClick}></Button>}
+              ref={el => this.uppyRef = el}
+              onFileAdded={this.handleFileAdded}
+              onFileRemoved={this.handleFileRemoved}/>
           </div>
+          <div className={'tradeFor'}>
+            <h2>Exchange for</h2>
+            <Checkbox label='Cash' onChange={this.cashChecked} />
+            <Checkbox label='Book' onChange={this.exchangeBookChecked} />
+            {cashInput}
+            {exchangeBook}
+            <Message error
+              hidden={!(this.state.errors.emptyExchangeBook)}>
+              Please select a valid book
+            </Message>
+            <Message error
+              hidden={!(this.state.errors.emptyCash)}>
+              You selected cash. Please specify a price
+            </Message>
+            <Message error
+              hidden={!(this.state.errors.emptyExchange)}>
+              Please select at least one option
+            </Message>
+          </div>
+          <Message error
+            hidden={!(this.state.errors.internal)}>
+            Internal error. Please try again later
+          </Message>
+          <Button type='submit' color='blue' onClick={this.clearErrors}>Create</Button>
         </div>
-
-        <div className={styles.mainForm}>
-          <Form>
-            <Form.Field>
-              <label>Description</label>
-              <Form.TextArea className={styles.description} placeholder='describe the book here' onChange={this.descriptionChanged}/>
-            </Form.Field>
-            <Dropdown
-                placeholder='Select condition'
-                fluid
-                search
-                selection
-                options={conditionOptions}
-                onChange={this.conditionSelected}
-            />
-          </Form>
-
-          <div className={styles.uploadComponentContainer}>
-            <UploadComponent handleFileDrop = {this.handleFileDrop}></UploadComponent>
-            {imageContainers}
-          </div>
-          <Button type='submit' onClick={this.handleCreate}>Create</Button>
-        </div>
-
-        <Modal open={this.props.createBookHasFailed}>
-            <Modal.Content>
-              <Modal.Description>
-                <p>FAILED TO CREATE LISTING</p>
-              </Modal.Description>
-            </Modal.Content>
-        </Modal>
-
-      </div>
+      </CreateListingContainer>
     );
   }
-
 }
 
 const mapStateToProps = (state) => {
   return {
     books: state.books,
-    getBooksHasFailed: state.getBooksHasFailed,
     createBookHasFailed: state.createBookHasFailed,
+    createListingHasFailed: state.createListingHasFailed
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
-    getData: () => dispatch(get_books()),
-    createBook: (book, trade) => dispatch(post_book(book, trade)),
-    setBookCreateFailure: (bool) => dispatch(post_book_failure(bool)),
-    createListing: (listing) => dispatch(post_listing(listing))
+    getData: () => dispatch(getBooks.start()),
+    createBook: book => dispatch(createBook.start(book)),
+    createListing: listing => dispatch(createListing.start(listing))
   };
 }
 

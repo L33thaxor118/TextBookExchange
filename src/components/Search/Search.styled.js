@@ -8,14 +8,31 @@ export const SearchContainer = styled.div`
   padding-left: 30px;
   padding-right: 30px;
   margin-top: 30px;
+  margin-left: 60px;
+  margin-right: 60px;
 
   & .segment.bottom {
     padding: 0px;
     border: none!important;
+    overflow-x: scroll;
 
-    & > .segments {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    & > .segments, .segment {
       border-radius: 0px;
     }
+
+    & .placeholder {
+      width: 100%;
+    }
+  }
+
+  & .search.icon {
+    width: 30px;
   }
 `;
 
@@ -41,7 +58,7 @@ export const StyledSearch = styled(Input)`
   }
 `;
 
-export const CreateListingButton = styled(Menu.Item).attrs({
+export const MenuButton = styled(Menu.Item).attrs({
   className: 'item',
   as: Button,
 })`
