@@ -3,13 +3,16 @@ import { makeRequest } from '.';
 const makeListingsRequest = (options = {}) => makeRequest({...options, endpoint: '/listings'});
 
 const getListingById = id => makeListingsRequest({ method: 'GET', id });
+const getListingsByUser = userId => makeListingsRequest({ method: 'GET', params: { userId }});
 const getAllListings = () => makeListingsRequest({ method: 'GET' });
 
 const listingsApi = {
   get(options = {}) {
-    const { id } = options;
+    const { id, userId } = options;
     if (id) {
       return getListingById(id);
+    } else if (userId) {
+      return getListingsByUser(userId);
     } else {
       return getAllListings(); 
     }
