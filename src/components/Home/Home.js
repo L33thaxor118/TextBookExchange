@@ -2,9 +2,6 @@
 @author Srilakshmi Prasad
 **/
 import React from 'react';
-import listingsApi from '../../api/listings';
-import usersApi from '../../api/users';
-import { authentication, fetchPhotoUrls } from '../../utils/firebase';
 import './Home.scss';
 
 const imgUrls = [
@@ -49,45 +46,11 @@ class Home extends React.Component {
         super();
         
 		this.state = {
-			listingIds: [],
-			user: [],
-			listings:[],
-			photoUrls:[],
             currentImageIndex: 0
         };
 
         this.nextSlide = this.nextSlide.bind(this);
 		this.previousSlide = this.previousSlide.bind(this);
-	}
-
-	async componentDidMount() {
-		const id = authentication.currentUser.uid; // log into firebase to get user test w 100
-		const userObj = await usersApi.get({id});
-		const listingIds = userObj.user.listings;
-		this.setState({
-			user:id
-		});
-
-		await Promise.all(listingIds.map(async (id) => {
-    		const listingObj = await listingsApi.get({id});
-    		this.setState({
-				listings: [...this.state.listings, listingObj.listing],
-				listingIds: [...this.state.listingIds, id]
-			});
-  		}));
-
-		await Promise.all(this.state.listings.map(async (listing) => {
-    		const photoUrls = await fetchPhotoUrls(listing._id, listing.imageNames);
-    		if (photoUrls.length===0) {
-    			var photoUrl = 'https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png';
-    		}
-    		else {
-    			photoUrl = photoUrls[0];
-    		}
-    		this.setState({
-				photoUrls: [...this.state.photoUrls, photoUrl]
-			});
-  		}));
 	}
 
 	navigateToBookSearch(query) {
