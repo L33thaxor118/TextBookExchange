@@ -45,6 +45,10 @@ const ProtectedRoute = ({ component: Component, currentUser, ...rest }) => (
 );
 
 export class App extends Component {
+  state = {
+    listingId: null,
+  };
+
   async componentDidMount() {
     await this.props.loadUserState();
   }
