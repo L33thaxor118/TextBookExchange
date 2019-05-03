@@ -1,6 +1,6 @@
 import React from 'react';
 import { Divider, Form, Button, Icon, Message, Label} from 'semantic-ui-react';
-import {fetchPhotoUrls} from '../../utils/firebase';
+import {fetchPhotoUrls, deleteListingPhotos} from '../../utils/firebase';
 import { Flex } from '@rebass/grid';
 import _ from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -58,6 +58,7 @@ class ModifyListing extends React.Component {
     this.clearErrors = this.clearErrors.bind(this);
     this.updateListing = this.updateListing.bind(this);
     this.leaveHandler = this.leaveHandler.bind(this);
+    this.clearInternalError = this.clearInternalError.bind(this);
   }
 
   async componentDidMount() {
@@ -65,7 +66,10 @@ class ModifyListing extends React.Component {
     const { listing } = await listingsApi.get({ id });
     let photoUrls = [];
     try{
+    console.log("getting");
+    console.log(listing.imageNames)
     photoUrls = await fetchPhotoUrls(listing._id, listing.imageNames);
+    console.log(photoUrls);
     } catch(error) {console.log(error)}
     this.setState({
       listing: listing,
@@ -138,6 +142,12 @@ class ModifyListing extends React.Component {
     this.setState({errors: errors}, ()=>{this.validateUpdate()});
   }
 
+  clearInternalError() {
+    let errors = this.state.errors;
+    errors.internal = false;
+    this.setState({errors});
+  }
+
   validateUpdate() {
     let listingKeys = Object.keys(this.state.listing);
     console.log(this.state.listing);
@@ -156,16 +166,26 @@ class ModifyListing extends React.Component {
   }
 
   async updateListing() {
-    //let oldImageNames = this.state.listing.imageNames;
-    //let filteredImageNames = oldImageNames.filter(
-    //  name => !this.state.removedPhotoNames.includes(name));
-    //let newImageNames = [...filteredImageNames, this.state.addedPhotoNames];
+    let updatedListing = this.state.listing;
+    let oldImageNames = this.state.listing.imageNames;
+    let filteredImageNames = oldImageNames.filter(
+     name => !this.state.removedPhotoNames.includes(name));
+    let newImageNames = filteredImageNames.concat(this.state.addedPhotoNames);
+    updatedListing.imageNames = newImageNames;
+
     try {
-      // await deleteListingPhotos(this.state.listing._id, this.state.removedPhotoNames);
-      // await this.uppyRef.upload();
-      // await listingsApi.update(this.state.listing);
-      //this.props.history.push('/listings/' + this.state.listing._id);
-      this.setState({updated: true});
+      await deleteListingPhotos(this.state.listing._id, this.state.removedPhotoNames);
+      await this.uppyRef.upload();
+
+      await listingsApi.update({
+        id:updatedListing._id,
+        description: updatedListing.description,
+        statusCompleted: updatedListing.statusCompleted,
+        price: updatedListing.price,
+        imageNames: updatedListing.imageNames
+      });
+      console.log("here3")
+      this.props.history.push('/listings/' + this.state.listing._id);
     }
     catch(err){
       console.log(err);
@@ -181,9 +201,11 @@ class ModifyListing extends React.Component {
   }
 
   async handleDeleteClicked() {
+    this.clearInternalError();
     try {
       await listingsApi.delete({id: this.state.listing._id});
-      this.setState({deleted: true})
+      await deleteListingPhotos(this.state.listing._id, this.state.listing.imageNames);
+      this.setState({deleted: true});
     } catch {
       let errors = this.state.errors;
       errors.internal = true;
@@ -191,11 +213,16 @@ class ModifyListing extends React.Component {
     }
   }
 
-  handleMarkAsComplete() {
+  async handleMarkAsComplete() {
+    this.clearInternalError();
     try {
+      await listingsApi.update({
+        id:this.state.listing._id,
+        statusCompleted: true
+      });
       let listing = this.state.listing;
       listing.statusCompleted = true;
-      this.setState({listing});
+      this.setState({listing})
     }
     catch{
       let errors = this.state.errors;
@@ -204,8 +231,13 @@ class ModifyListing extends React.Component {
     }
   }
 
-  handleMarkAsIncomplete() {
+  async handleMarkAsIncomplete() {
+    this.clearInternalError();
     try {
+      await listingsApi.update({
+        id: this.state.listing._id,
+        statusCompleted: false
+      });
       let listing = this.state.listing;
       listing.statusCompleted = false;
       this.setState({listing});
@@ -347,8 +379,8 @@ class ModifyListing extends React.Component {
               trigger = {({ onClick }) =>
                 <Button color='teal' size='massive' icon='upload' onClick={onClick}></Button>}
               ref={el => this.uppyRef = el}
-              onFileAdded={this.handlePhotoAdded}
-              onFileRemoved={this.handlePhotoRemoved}/>
+              onFileAdded={this.handleUploadPhotoAdded}
+              onFileRemoved={this.handleUploadPhotoRemoved}/>
             </Flex>
             <Message error
               hidden={!(this.state.errors.internal)}>
@@ -359,11 +391,9 @@ class ModifyListing extends React.Component {
               Successfuly updated listing
             </Message>
             <div className='endButtons'>
-              <Flex flexDirection='row' justifyContent='space-around'>
-              <Button fluid color='green' onClick={this.handleUpdateClicked}> Update Listing</Button>
-              <Button fluid color='red' onClick={this.handleCancelClicked}> Cancel </Button>
-              <Button fluid color='red' inverted onClick={this.handleDeleteClicked}> Delete </Button>
-              </Flex>
+              <Button fluid className='b1' color='green' onClick={this.handleUpdateClicked}> Update Listing</Button>
+              <Button fluid className='b2' color='red' onClick={this.handleCancelClicked}> Cancel </Button>
+              <Button fluid className='b3' color='red' inverted onClick={this.handleDeleteClicked}> Delete </Button>
             </div>
           </div>
         </ModifyListingContainer>

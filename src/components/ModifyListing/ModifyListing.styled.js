@@ -26,7 +26,23 @@ export const ModifyListingContainer = styled.div`
     align-items: center;
     padding-top: 30px;
     .endButtons {
-      margin-top: 5%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      width: 80%;
+      margin: 5% 0 3% 0;
+      .b1{
+        width: 30%;
+        display: flex;
+      }
+      .b2{
+        width: 30%;
+        display: flex;
+      }
+      .b3{
+        width: 30%;
+        display: flex;
+      }
     }
   }
 `;
