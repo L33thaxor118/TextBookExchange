@@ -17,6 +17,8 @@ import {
 
 const lookupBookByISBN = isbn => axios.get('https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn).then(({ data }) => data);
 
+const STOCK_PHOTO_URL = 'https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png';
+
 class Dashboard extends Component {
 	constructor() {
 		super();
@@ -28,7 +30,7 @@ class Dashboard extends Component {
 			wishlist:[],
 			wishlistIds:[],
 			books: [],
-			image: 'https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png',
+			image: STOCK_PHOTO_URL,
 			wishlistIsbn:'',
 			wishlistBookId:'',
 			wishlistBookTitle:undefined,
@@ -51,29 +53,23 @@ class Dashboard extends Component {
 
 	async componentDidMount() {
 		const { user } = this.props;
-		
-		const listingIds = user.listings;
 		const { books } = await booksApi.get({});
-
-		const listings = await new Promise(async resolve => {
-			const listingsArr = [];
-			for (let id of listingIds) {
-				const { listing } = await listingsApi.get({ id });
-				listingsArr.push(listing);
-			}
-
-			resolve(listingsArr);
-		});
+		const { listings } = await listingsApi.get({ userId: user.firebaseId });
 
 		const photoUrls = await new Promise(async resolve => {
 			const urls = [];
 			
 			for (let listing of listings) {
 				if (listing.imageNames.length) {
-					const photoUrl = await fetchPhotoUrls(listing._id, [listing.imageNames[0]]);
-					urls.push(photoUrl);
+					try {
+						const photoUrl = await fetchPhotoUrls(listing._id, [listing.imageNames[0]]);
+						urls.push(photoUrl);
+					// If firebase throws an error, fall back to the stock photo
+					} catch {
+						urls.push(STOCK_PHOTO_URL);
+					}
 				} else {
-					urls.push('https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png');
+					urls.push(STOCK_PHOTO_URL);
 				}
 			}
 
