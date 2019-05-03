@@ -10,7 +10,7 @@ import ListingDetails from './components/ListingDetails';
 import ModifyListing from './components/ModifyListing';
 import Search from './components/Search';
 import Dashboard from './components/Dashboard';
-
+import Home from './components/Home';
 import Header from './components/Header';
 
 // Stylesheets
@@ -66,6 +66,7 @@ export class App extends Component {
           <div className='pageContainer'>
             <Header />
             <Switch>
+              <ProtectedRoute exact path='/' component={Home} currentUser={currentUser} />
               <ProtectedRoute exact path='/dashboard' component={Dashboard} currentUser={currentUser} />
               <ProtectedRoute exact path='/listings' component={Search} currentUser={currentUser} />
               <Route
