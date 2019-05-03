@@ -18,7 +18,7 @@ export const storage = firebase.storage();
 
 export const uploadPhotos = async (listingId, imageFiles) => {
   let storageRef = storage.ref();
-  
+
   await Promise.all(imageFiles.map(file => {
     const imageRef = storageRef.child(listingId + '/' + file.name);
     return imageRef.put(file);
@@ -30,15 +30,23 @@ export const uploadPhotos = async (listingId, imageFiles) => {
 export const fetchPhotoUrls = async (listingId, imageNames) => {
   const photoUrls = [];
   let storageRef = storage.ref();
-  
+
   await Promise.all(imageNames.map(name => {
     const imageRef = storageRef.child(listingId + '/' + name);
-    return imageRef.getDownloadURL().then(photoUrls.push.bind(photoUrls));
+    return imageRef.getDownloadURL().then((url)=>{photoUrls.push(url)});
   }));
-  
+
   return photoUrls;
 };
 
-export const deleteListingPhotos = (listingId) => {
+export const deleteListingPhotos = async (listingId, imageNames) => {
+  let storageRef = storage.ref();
+
+  await Promise.all(imageNames.map(name => {
+    const imageRef = storageRef.child(listingId + '/' + name);
+    return imageRef.delete();
+  })).catch((error)=>{return error;});
+
+  return "success";
 
 };

@@ -15,7 +15,7 @@ export function books(state = [], action) {
 export function createBookHasFailed(state = false, action) {
   switch (action.type) {
     case CREATE_BOOK.FAILURE:
-      return action.hasErrored;
+      return action.error;
     default:
       return state;
   }
@@ -35,7 +35,7 @@ export function listings(state = [], action) {
 export function getListingsHasFailed(state = false, action) {
   switch (action.type) {
     case GET_LISTINGS.FAILURE:
-      return action.hasErrored;
+      return action.error;
     default:
       return state;
   }
@@ -44,7 +44,7 @@ export function getListingsHasFailed(state = false, action) {
 export function createListingHasFailed(state = false, action) {
   switch (action.type) {
     case CREATE_LISTING.FAILURE:
-      return action.hasErrored;
+      return action.error;
     default:
       return state;
   }
