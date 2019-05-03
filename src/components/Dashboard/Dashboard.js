@@ -53,37 +53,53 @@ class Dashboard extends Component {
 		const { user } = this.props;
 		
 		const listingIds = user.listings;
-		const booksObj = await booksApi.get({});
+		const { books } = await booksApi.get({});
 
-		this.setState({
-			user: user.firebaseId,
-			books: booksObj.books
+		const listings = await new Promise(async resolve => {
+			const listingsArr = [];
+			for (let id of listingIds) {
+				const { listing } = await listingsApi.get({ id });
+				listingsArr.push(listing);
+			}
+
+			resolve(listingsArr);
 		});
 
-		await Promise.all(listingIds.map(async id => {
-			const listingObj = await listingsApi.get({ id });
-			this.setState({
-				listings: [...this.state.listings, listingObj.listing],
-				listingIds: [...this.state.listingIds, id]
-			});
-		}));
+		const photoUrls = await new Promise(async resolve => {
+			const urls = [];
+			
+			for (let listing of listings) {
+				if (listing.imageNames.length) {
+					const photoUrl = await fetchPhotoUrls(listing._id, [listing.imageNames[0]]);
+					urls.push(photoUrl);
+				} else {
+					urls.push('https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png');
+				}
+			}
 
-		await Promise.all(this.state.listings.map(async listing => {
-			const photoUrls = await fetchPhotoUrls(listing._id, listing.imageNames);
-			const photoUrl = photoUrls.length ? photoUrls[0] :  'https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png';
+			resolve(urls);
+		});
 
-			this.setState({
-				photoUrls: [...this.state.photoUrls, photoUrl]
-			});
-		})).catch(console.error);
+		const wishlistBooks = await new Promise(async resolve => {
+			const books = [];
 
-		await Promise.all(user.wishlist.map(async id => {
-			const bookObj = await booksApi.get({ id });
-			this.setState({
-				wishlist: [...this.state.wishlist, bookObj.book],
-				wishlistIds:[...this.state.wishlistIds, id]
-			});
-		}));
+			for (let wishlistItem of user.wishlist) {
+				const bookObj = await booksApi.get({ id: wishlistItem });
+				books.push(bookObj.book);
+			}
+
+			resolve(books);
+		});
+
+		this.setState({
+			wishlist: wishlistBooks,
+			wishlistIds: user.wishlist,
+			photoUrls,
+			listings,
+			listingIds: user.listings,
+			user: user.firebaseId,
+			books,
+		});
 	}
 
 	async handleDeleteListing(id) {
