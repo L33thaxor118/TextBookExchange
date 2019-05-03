@@ -63,7 +63,7 @@ export class App extends Component {
             <Switch>
               <ProtectedRoute exact path='/dashboard' component={Dashboard} currentUser={currentUser} />
               <ProtectedRoute exact path='/listings' component={Search} currentUser={currentUser} />
-              <ProtectedRoute
+              <Route
                 exact
                 path='/listings/new'
                 component={CreateListing}

@@ -15,7 +15,7 @@ class ListCreator extends Component {
 
   addItem() {
     console.log(this.state.inputText);
-    this.props.addItem(this.state.inputText);
+    if (this.state.inputText.length > 0) this.props.addItem(this.state.inputText);
   }
 
   removeItem(event, {label}) {
@@ -34,8 +34,9 @@ class ListCreator extends Component {
       return (
         <Button label={item}
           labelPosition='left'
-          onClick={this.removeItem}>
-        X</Button>
+          onClick={this.removeItem}
+          icon='times'
+          />
       );
     });
     return (

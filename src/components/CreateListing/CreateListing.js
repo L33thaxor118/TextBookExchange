@@ -3,9 +3,7 @@ import React, { Component } from 'react';
 
 import axios from 'axios';
 import _ from 'lodash';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { CreateListingContainer, Exchange, CreateListingMainForm } from './CreateListing.styled';
-import UploadComponent from './UploadComponent/UploadComponent';
+import { CreateListingContainer } from './CreateListing.styled';
 import PhotoUploadPreview from './PhotoUploadPreview/PhotoUploadPreview';
 import SelectBook from './SelectBook/SelectBook'
 import { authentication, uploadPhotos, fetchPhotoUrls } from '../../utils/firebase'
@@ -36,7 +34,6 @@ class CreateListing extends Component {
       selectedFromDropdown: true,
       selectedFromDropdownTrade: true,
       newListing: {},
-      cashOnly: false,
 
       newBookFormISBN: "",
       displayBookTitle: "",
@@ -47,6 +44,8 @@ class CreateListing extends Component {
       displayTradeBookTitle: "",
       tradeIsbnLoading: false,
       tradeIsbnNotFound: false,
+      cashChecked: false,
+      exchangeBookChecked: false,
 
       errors:  {},
       modalOpen: false
@@ -66,17 +65,20 @@ class CreateListing extends Component {
     this.createTradeBookFormISBNChanged = this.createTradeBookFormISBNChanged.bind(this);
     this.checkIfBookExists = this.checkIfBookExists.bind(this);
     this.radioButtonChanged = this.radioButtonChanged.bind(this);
-    this.checkboxChanged = this.checkboxChanged.bind(this);
+    this.cashChecked = this.cashChecked.bind(this);
+    this.exchangeBookChecked = this.exchangeBookChecked.bind(this);
     this.clearErrors = this.clearErrors.bind(this);
     this.validateListing = this.validateListing.bind(this);
     this.setInternalError = this.setInternalError.bind(this);
+    this.removeIsbnError = this.removeIsbnError.bind(this);
+    this.removeIsbnErrorTrade = this.removeIsbnErrorTrade.bind(this);
+    this.checkIfCashOnly = this.checkIfCashOnly.bind(this);
   }
 
   async componentDidMount() {
     if (this.props.listing != null) {
       console.log("modify mode")
     }
-
     await this.props.getData();
     const user = authentication.currentUser
     const listing = {
@@ -93,9 +95,9 @@ class CreateListing extends Component {
       emptyExchangeBook: false,
       emptyBook: false,
       emptyCash: false,
-      emptyCondition: false
+      emptyCondition: false,
+      emptyExchange: false
     }
-
     this.setState({
       books: this.props.books,
       newListing: listing,
@@ -103,11 +105,30 @@ class CreateListing extends Component {
     });
   }
 
+  checkIfCashOnly(){
+    if (this.state.cashChecked && !this.state.exchangeBookChecked) return true;
+    else return false;
+  }
+
   handleRemovePhoto(idx) {
     let newList = this.state.imageFileList;
     newList.splice(idx, 1);
     this.setState({
       imageFileList: newList
+    });
+  }
+
+  removeIsbnError() {
+    this.setState({
+      displayBookTitle: "",
+      isbnNotFound: false
+    });
+  }
+
+  removeIsbnErrorTrade() {
+    this.setState({
+      displayTradeBookTitle: "",
+      tradeIsbnNotFound: false
     });
   }
 
@@ -128,6 +149,9 @@ class CreateListing extends Component {
   validateListing() {
     let errors = this.state.errors;
     let newListing = this.state.newListing;
+    if (!this.state.cashChecked && !this.state.exchangeBookChecked) {
+      errors.emptyExchange = true;
+    }
     if (this.state.selectedFromDropdown && newListing.bookId === ""){
       errors.emptyBook = true;
     }
@@ -135,14 +159,14 @@ class CreateListing extends Component {
       errors.emptyBook = true;
     }
     if ((this.state.selectedFromDropdownTrade && newListing.exchangeBook === "")
-          && !this.state.cashOnly){
+          && this.state.exchangeBookChecked){
       errors.emptyExchangeBook = true;
     }
     if ((!this.state.selectedFromDropdownTrade &&
-          this.state.displayTradeBookTitle === "") && !this.state.cashOnly){
+          this.state.displayTradeBookTitle === "") && this.state.exchangeBookChecked){
       errors.emptyExchangeBook = true;
     }
-    if (newListing.price === 0 && this.state.cashOnly) {
+    if (newListing.price === 0 && this.state.cashChecked) {
       errors.emptyCash = true;
     }
     if (newListing.condition === "") {
@@ -157,12 +181,11 @@ class CreateListing extends Component {
     return false;
   }
 
+
   async handleCreate() {
     if (this.validateListing()) {
-      setTimeout(this.clearErrors, 6000);
       return;
     }
-    console.log("proceeding");
     let newListing = this.state.newListing;
     if (this.state.cashOnly) newListing.exchangeBook = "";
     try{
@@ -204,7 +227,7 @@ class CreateListing extends Component {
   clearErrors(){
     let errors = this.state.errors;
     errors = _.mapValues(errors, () => false);
-    this.setState({errors: errors});
+    this.setState({errors: errors}, ()=>{this.handleCreate()});
   }
 
   radioButtonChanged(buttonVal) {
@@ -235,87 +258,97 @@ class CreateListing extends Component {
   tradeBookSelected(event, {result}) {
     const updatedListing = this.state.newListing;
     updatedListing.exchangeBook = result.id;
+    let errors = this.state.errors;
+    errors.emptyExchangeBook= false;
     this.setState({
-      newListing: updatedListing
+      newListing: updatedListing,
+      errors: errors
     });
   }
 
   bookSelected(event, {result}) {
     const updatedListing = this.state.newListing;
     updatedListing.bookId = result.id;
+    let errors = this.state.errors;
+    errors.emptyBook= false;
     this.setState({
-      newListing: updatedListing
+      newListing: updatedListing,
+      errors: errors
     });
   }
 
-  async createBookFormISBNChanged(event) {
-    let digits = event.target.value.length;
+  async createBookFormISBNChanged(isbn) {
+    let digits = isbn.length;
+    if (digits === 0) return;
+    let errors = this.state.errors;
+    errors.emptyBook= false;
     this.setState({
-      newBookFormISBN: event.target.value,
+      newBookFormISBN: isbn,
       isbnLoading: digits? true : false,
       isbnNotFound: false,
-      displayBookTitle: ""
+      displayBookTitle: "",
+      errors: errors
     });
-    if (digits === 10 || digits === 13) {
-      let book = this.checkIfBookExists(event.target.value);
-      if (book != null) {
-        this.setState({
-          isbnLoading: false,
-          isbnNotFound: false,
-          displayBookTitle: book.title + " by " + book.authors
-        });
-        return;
-      }
-      try {
-        let response = await lookupBookByISBN(event.target.value);
-        let title = response.items[0].volumeInfo.title;
-        let authors = response.items[0].volumeInfo.authors;
-        this.setState({
-          isbnLoading: false,
-          isbnNotFound: false,
-          displayBookTitle: title + " by " + authors
-        });
-      } catch {
-        this.setState({
-          isbnLoading: false,
-          isbnNotFound: true
-        });
-      }
+    let book = this.checkIfBookExists(isbn);
+    if (book != null) {
+      this.setState({
+        isbnLoading: false,
+        isbnNotFound: false,
+        displayBookTitle: book.title + " by " + book.authors
+      });
+      return;
+    }
+    try {
+      let response = await lookupBookByISBN(isbn);
+      let title = response.items[0].volumeInfo.title;
+      let authors = response.items[0].volumeInfo.authors;
+      this.setState({
+        isbnLoading: false,
+        isbnNotFound: false,
+        displayBookTitle: title + " by " + authors
+      });
+    } catch {
+      this.setState({
+        isbnLoading: false,
+        isbnNotFound: true
+      });
     }
   }
 
-  async createTradeBookFormISBNChanged(event) {
-    let digits = event.target.value.length;
+  async createTradeBookFormISBNChanged(isbn) {
+    let digits = isbn.length;
+    if (digits === 0) return;
+    let errors = this.state.errors;
+    errors.emptyExchangeBook= false;
     this.setState({
-      newTradeBookFormISBN: event.target.value,
+      newTradeBookFormISBN: isbn,
       tradeIsbnLoading: digits? true : false,
       tradeIsbnNotFound: false,
-      displayTradeBookTitle: ""
+      displayTradeBookTitle: "",
+      errors: errors
     });
-    if (digits === 10 || digits === 13) {
-      let book = this.checkIfBookExists(event.target.value);
-      if (book != null) {
-        this.setState({
-          tradeIsbnLoading: false,
-          tradeIsbnNotFound: false,
-          displayTradeBookTitle: book.title
-        });
-        return;
-      }
-      try {
-        let response = await lookupBookByISBN(event.target.value);
-        let title = response.items[0].volumeInfo.title;
-        this.setState({
-          tradeIsbnLoading: false,
-          tradeIsbnNotFound: false,
-          displayTradeBookTitle: title
-        });
-      } catch {
-        this.setState({
-          tradeIsbnLoading: false,
-          tradeIsbnNotFound: true
-        });
-      }
+    let book = this.checkIfBookExists(isbn);
+    if (book != null) {
+      this.setState({
+        tradeIsbnLoading: false,
+        tradeIsbnNotFound: false,
+        displayTradeBookTitle: book.title
+      });
+      return;
+    }
+    try {
+      let response = await lookupBookByISBN(isbn);
+      let title = response.items[0].volumeInfo.title;
+      this.setState({
+        tradeIsbnLoading: false,
+        tradeIsbnNotFound: false,
+        displayTradeBookTitle: title
+      });
+    } catch {
+      this.setState({
+        tradeIsbnLoading: false,
+        tradeIsbnNotFound: true
+      });
     }
   }
 
@@ -331,16 +364,22 @@ class CreateListing extends Component {
   conditionSelected(event, {value}) {
     const updatedListing = this.state.newListing;
     updatedListing.condition = value;
+    let errors = this.state.errors;
+    errors.emptyCondition= false;
     this.setState({
-      newListing: updatedListing
+      newListing: updatedListing,
+      errors: errors
     });
   }
 
   priceChanged(event){
     const updatedListing = this.state.newListing;
     updatedListing.price = parseInt(event.target.value);
+    let errors = this.state.errors;
+    errors.emptyCash= false;
     this.setState({
-      newlisting: updatedListing
+      newlisting: updatedListing,
+      errors: errors
     });
   }
 
@@ -350,32 +389,64 @@ class CreateListing extends Component {
     });
   }
 
-  checkboxChanged(event, {checked}) {
-    console.log(checked);
+  cashChecked(event, {checked}) {
+    let errors = this.state.errors;
+    errors.emptyExchange= false;
     this.setState({
-      cashOnly: checked
+      cashChecked: checked,
+      errors: errors
     });
   }
 
+  exchangeBookChecked(event, {checked}) {
+    let errors = this.state.errors;
+    errors.emptyExchange= false;
+    this.setState({
+      exchangeBookChecked: checked,
+      errors: errors
+    });
+  }
 
   render() {
+    var bookOptions = this.props.books.map( book => ({isbn: book.isbn, title: book.title, authors: book.authors, id: book._id }) )
     var imageContainers = [];
     var imageFiles = this.state.imageFileList;
     for (let i = 0; i < imageFiles.length; i++) {
       imageContainers.push(
           <div className={'previewImage'}>
-          <PhotoUploadPreview removePhoto={this.handleRemovePhoto} photo={createObjectURL(imageFiles[i])} idx = {i}/>
+            <PhotoUploadPreview removePhoto={this.handleRemovePhoto} photo={createObjectURL(imageFiles[i])} idx = {i}/>
           </div>
-        );
+      );
     }
-    var bookOptions = this.props.books.map( book => ({isbn: book.isbn, title: book.title, authors: book.authors, id: book._id }) )
+    var exchangeBook = null;
+    if (this.state.exchangeBookChecked) {
+      exchangeBook = (
+        <SelectBook bookOptions = {bookOptions}
+          removeIsbnError = {this.removeIsbnErrorTrade}
+          bookCreationHandler = {this.openModal}
+          displayTitle = {this.state.displayTradeBookTitle}
+          onRadioButtonChange = {this.radioButtonChanged}
+          name = {"tradeFor"}
+          bookSelected = {this.tradeBookSelected}
+          loading = {this.state.tradeIsbnLoading}
+          createBookFormISBNChanged = {this.createTradeBookFormISBNChanged}
+          createBookHasFailed = {this.state.tradeIsbnNotFound}
+          selectedFromDropdown = {this.state.selectedFromDropdownTrade}/>
+      );
+    }
+    var cashInput = null;
+    if (this.state.cashChecked) {
+      cashInput = (
+        <Form.Input onChange={this.priceChanged} label="Price" placeholder="$"/>
+      );
+    }
     return (
       <CreateListingContainer>
-        <div className='background'></div>
-        <Exchange>
+        <h1>Create a new Listing</h1>
+        <div className='background'>
           <div className={'offer'}>
-            <h1>What you've got</h1>
             <SelectBook bookOptions = {bookOptions}
+              removeIsbnError = {this.removeIsbnError}
               bookCreationHandler= {this.openModal}
               onRadioButtonChange = {this.radioButtonChanged}
               displayTitle = {this.state.displayBookTitle}
@@ -385,74 +456,58 @@ class CreateListing extends Component {
               createBookFormISBNChanged = {this.createBookFormISBNChanged}
               createBookHasFailed = {this.state.isbnNotFound}
               selectedFromDropdown = {this.state.selectedFromDropdown}/>
-              <div className="offerForm">
-                <Dropdown
-                    placeholder='Select condition'
-                    fluid
-                    search
-                    selection
-                    options={conditionOptions}
-                    onChange={this.conditionSelected}
-                />
-                <Message error
-                  hidden={!(this.state.errors.emptyBook)}>
-                  Please select a book
-                </Message>
-                <Message error
-                  hidden={!(this.state.errors.emptyCondition)}>
-                  Please enter your book's condition
-                </Message>
-              </div>
+            <div className="offerForm">
+              <Dropdown
+                  placeholder='Select condition'
+                  fluid
+                  search
+                  selection
+                  options={conditionOptions}
+                  onChange={this.conditionSelected}
+              />
+              <Message error
+                hidden={!(this.state.errors.emptyBook)}>
+                Please select a valid book
+              </Message>
+              <Message error
+                hidden={!(this.state.errors.emptyCondition)}>
+                Please enter your book's condition
+              </Message>
+            </div>
           </div>
-          <FontAwesomeIcon className={'icon'} icon="exchange-alt" size="3x"/>
+          <div className="createListingDescription">
+            <Form>
+              <Form.Field>
+                <h2>Description</h2>
+                <Form.TextArea className={'description'} placeholder='describe the book here' onChange={this.descriptionChanged}/>
+              </Form.Field>
+            </Form>
+          </div>
           <div className={'tradeFor'}>
-            <h1>What you're looking for</h1>
-            <SelectBook bookOptions = {bookOptions}
-              bookCreationHandler = {this.openModal}
-              disabled = {this.state.cashOnly}
-              displayTitle = {this.state.displayTradeBookTitle}
-              onRadioButtonChange = {this.radioButtonChanged}
-              name = {"tradeFor"}
-              bookSelected = {this.tradeBookSelected}
-              loading = {this.state.tradeIsbnLoading}
-              createBookFormISBNChanged = {this.createTradeBookFormISBNChanged}
-              createBookHasFailed = {this.state.tradeIsbnNotFound}
-              selectedFromDropdown = {this.state.selectedFromDropdownTrade}/>
-            <Form.Input onChange={this.priceChanged} label="I also want Cash" placeholder="$"/>
-            <Checkbox label='I only want cash. No books' onChange={this.checkboxChanged} />
+            <h2>Exchange for</h2>
+            <Checkbox label='Cash' onChange={this.cashChecked} />
+            <Checkbox label='Book' onChange={this.exchangeBookChecked} />
+            {cashInput}
+            {exchangeBook}
             <Message error
               hidden={!(this.state.errors.emptyExchangeBook)}>
-              Please enter a valid book or select CASH ONLY
+              Please select a valid book
             </Message>
             <Message error
               hidden={!(this.state.errors.emptyCash)}>
-              You selected cash only. Please specify a price
+              You selected cash. Please specify a price
             </Message>
-          </div>
-        </Exchange>
-
-        <CreateListingMainForm>
-          <Form>
-            <Form.Field>
-              <label>Description</label>
-              <Form.TextArea className={'description'} placeholder='describe the book here' onChange={this.descriptionChanged}/>
-            </Form.Field>
-          </Form>
-
-          <div className={'uploadComponentContainer'}>
-            <div className={'dragbox'}>
-              <UploadComponent handleFileDrop = {this.handleFileDrop}/>
-            </div>
-            <div className={'imagesContainer'}>
-              {imageContainers}
-            </div>
+            <Message error
+              hidden={!(this.state.errors.emptyExchange)}>
+              Please select at least one option
+            </Message>
           </div>
           <Message error
             hidden={!(this.state.errors.internal)}>
-            Internal error. Please try again later.
+            Internal error. Please try again later
           </Message>
-          <Button type='submit' onClick={this.handleCreate}>Create</Button>
-        </CreateListingMainForm>
+          <Button type='submit' color='blue' onClick={this.clearErrors}>Create</Button>
+        </div>
       </CreateListingContainer>
     );
   }

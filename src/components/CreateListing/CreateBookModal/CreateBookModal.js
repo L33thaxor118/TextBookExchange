@@ -28,6 +28,7 @@ class CreateBookModal extends Component {
     this.isbnChanged = this.isbnChanged.bind(this);
     this.clearErrors = this.clearErrors.bind(this);
     this.handleCreate = this.handleCreate.bind(this);
+    this.close = this.close.bind(this);
   }
 
   async handleCreate() {
@@ -115,6 +116,20 @@ class CreateBookModal extends Component {
       title: title
     });
   }
+  close() {
+    this.setState({
+      courses: [],
+      title: "",
+      authors: [],
+      isbn: "",
+      titleRequiredError: false,
+      isbnRequiredError: false,
+      authorRequiredError: false,
+      bookCreationFailed: false,
+      bookCreationSuccess: false
+    });
+    this.props.close();
+  }
 
   isbnChanged(event){
     let isbn = event.target.value;
@@ -126,17 +141,19 @@ class CreateBookModal extends Component {
   render() {
     return (
       <Modal open={this.props.open}
-        closeOnEscape={true}
-        closeOnRootNodeClick={true}>
+        size='tiny'
+        onClose={this.close}>
         <Modal.Content>
           <Form>
             <Form.Field error={this.state.titleRequiredError}>
               <label>Title</label>
-              <input onChange = {this.titleChanged} placeholder='title' />
+              <input value = {this.state.title}
+                onChange = {this.titleChanged}
+                placeholder='Book title' />
             </Form.Field>
             <Form.Field error={this.state.isbnRequiredError}>
               <label>ISBN</label>
-              <input onChange = {this.isbnChanged} placeholder='Last Name' />
+              <input onChange = {this.isbnChanged} placeholder='10 or 13 digit ISBN' />
             </Form.Field>
             <Form.Field error={this.state.authorRequiredError}>
               <h4>Add Authors</h4>
@@ -145,10 +162,8 @@ class CreateBookModal extends Component {
                 removeItem = {this.removeAuthor}
               />
             </Form.Field>
-            <h4>Add Relevant Courses</h4>
-
             <Button type='submit' onClick={this.handleCreate}>Submit</Button>
-            <Button color='red' onClick={this.props.close}>Cancel</Button>
+            <Button color='red' onClick={this.close}>Cancel</Button>
           </Form>
           <Message success hidden={!this.state.bookCreationSuccess}>
             Created book! You can now select it via ISBN or Search
