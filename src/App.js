@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 
+import { Loader } from 'semantic-ui-react';
+import { Flex } from '@rebass/grid';
+
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faExchangeAlt, faUpload, faPlus} from '@fortawesome/free-solid-svg-icons'
 import UserAuthentication from './components/SignIn';
@@ -81,7 +84,11 @@ export class App extends Component {
           </div>
         </Route>
       </Router>
-    ) : null;
+    ) : (
+      <Flex alignItems='center' style={{height: '100vh'}}>
+        <Loader active inline='centered' content='Loading' />
+      </Flex>
+    );
   }
 }
 
