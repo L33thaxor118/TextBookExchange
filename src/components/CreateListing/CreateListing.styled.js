@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { Form } from 'semantic-ui-react';
 
 export const CreateListingContainer = styled.div`
   padding-top:1%;
@@ -18,30 +19,20 @@ export const CreateListingContainer = styled.div`
     border-radius: 15px;
     display: flex;
     flex-direction: column;
-    align-items: center;
     align-self: center;
   }
+
   .errorMessage{
     display: flex;
     flex-direction: row;
     padding: 0% 5%;
   }
+`;
 
-  .offer {
-    width: 100%;
+export const StyledFormSelect = styled(Form.Select)`
+  text-transform: capitalize;
+
+  & .text {
+    text-transform: capitalize;
   }
-
-  .offerForm {
-    width: 60%;
-
-  }
-  .createListingDescription{
-    width: 100%;
-    margin: 2% 0;
-  }
-  .tradeFor {
-    width: 100%;
-
-  }
-
 `;
