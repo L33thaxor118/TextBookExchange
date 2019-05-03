@@ -34,15 +34,14 @@ class ListingDetails extends React.Component {
     console.log(photoUrls);
     var photos = photoUrls;
     if (photoUrls.length === 0) {
-      console.log('no photo found');
-      photos.push("https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png")
+      photos.push('https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png');
     }
     console.log(photos);
     this.setState({photos});
   }
 
   render() {
-    return ( 
+    return (
       this.state.listing ? (
         <ListingContainer>
           <Flex>

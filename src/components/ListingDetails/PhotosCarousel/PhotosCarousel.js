@@ -14,8 +14,13 @@ class PhotosCarousel extends Component {
 		this.goNext = this.goNext.bind(this);
 		this.goPrev = this.goPrev.bind(this);
 	}
-	componentDidMount() {
-		this.setState({photos: this.props.photos})
+
+	componentDidUpdate(prevProps, prevState, snapshot) {
+	  if (this.props !== prevProps) {
+	      this.setState({
+	          photos: this.props.photos
+	      });
+	  }
 	}
 
 	goNext() {
