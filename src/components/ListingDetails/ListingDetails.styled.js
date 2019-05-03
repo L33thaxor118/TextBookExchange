@@ -14,6 +14,21 @@ export const BookTitle = styled.div`
   font-weight: bold;
 `;
 
+export const Price = styled.div`
+  font-size:16px;
+  font-weight: bold;
+  color: #E31F1F;
+  display:inline;
+  margin-top: 10px;
+`;
+
+
+export const Isbn = styled.div`
+  font-size:12px;
+  margin-top: 4px;
+  margin-left:48px;
+`;
+
 export const AuthorsList = styled.div`
   color: #999;
   font-style: italic;

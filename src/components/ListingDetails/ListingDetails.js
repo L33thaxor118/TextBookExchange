@@ -1,50 +1,73 @@
 import React from 'react';
 import moment from 'moment';
-import { Image, Divider } from 'semantic-ui-react';
+import { Divider, Segment } from 'semantic-ui-react';
 import { Flex } from '@rebass/grid';
+import PhotosCarousel from './PhotosCarousel/PhotosCarousel';
+import './ListingDetails.scss'
+import { fetchPhotoUrls } from '../../utils/firebase';
 
 import {
-  ImageContainer,
   ListingContainer,
   AuthorsList,
   BookTitle,
+  Price,
+  Isbn,
 } from './ListingDetails.styled';
 
 import listingsApi from '../../api/listings';
 
+
 class ListingDetails extends React.Component {
-  state = {
-    listing: null,
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      listing: null,
+      photos:[]
+    };
+  }
 
   async componentDidMount() {
     const { id } = this.props.match.params;
     const { listing } = await listingsApi.get({ id });
     this.setState({ listing });
+    const photoUrls = await fetchPhotoUrls(listing._id, listing.imageNames);
+    console.log(photoUrls);
+    var photos = photoUrls;
+    if (photoUrls.length === 0) {
+      console.log('no photo found');
+      photos.push("https://cor-cdn-static.bibliocommons.com/assets/default_covers/icon-book-93409e4decdf10c55296c91a97ac2653.png")
+    }
+    console.log(photos);
+    this.setState({photos});
   }
 
   render() {
-    const { listing } = this.state;
-
-    return (
-      listing ? (
+    return ( 
+      this.state.listing ? (
         <ListingContainer>
           <Flex>
-            <ImageContainer>
-              <Image
-                src='https://compass-isbn-assets.s3.amazonaws.com/isbn_cover_images/9781285741550/9781285741550_largeCoverImage.gif'
-                size='medium'
-              /> 
-            </ImageContainer>
-            <Flex flexDirection='column' width={1}>
-              <BookTitle>{listing.book.title}</BookTitle>
-              <AuthorsList>{listing.book.authors.join(', ')}</AuthorsList>
+            <Flex flexDirection='column' width={1} >
+              <BookTitle>{this.state.listing.book.title}</BookTitle>
+              <AuthorsList>{"By " + this.state.listing.book.authors.join(', ')}</AuthorsList>
               <Divider />
-              <div>Listed by: {listing.assignedUser.displayName}</div>
-              <div>Last updated: {moment(listing.dateCreated).format('MMMM DD, YYYY H:mm:ss ')}</div>
-              <div>Condition: {listing.condition}</div>
-              <div>Price: ${listing.price}</div>
-              <div>Exchange for: {listing.exchangeBook ? listing.exchangeBook.title : '--'}</div>
+                <Flex flexDirection='row' width={1} alignItems="center">
+                  <PhotosCarousel class="information" photos={this.state.photos}/>
+                  <div class="information">
+                  <Flex flexDirection='column' width={1} alignItems="center">
+                    <Segment padded='very' compact className="segment">
+                    <div class="price">Price: <Price> {this.state.listing.price ? `$${this.state.listing.price}` : '—'}</Price> </div>
+                      <div class="price">Exchange for: <Price>{this.state.listing.exchangeBook ? this.state.listing.exchangeBook.title : '—'} </Price> </div>
+                      <div class="price"> Condition: {this.state.listing.condition}</div>
+                      <div class="price">Last updated: {moment(this.state.listing.dateCreated).format('MMMM DD, YYYY H:mm:ss ')}</div>
+                      <div class="price">Listed by: {this.state.listing.assignedUser.displayName}</div>
+                    </Segment>
+                  </Flex>
+                  </div>
+                </Flex>
+                <Isbn> ISBN: {this.state.listing.book.isbn}</Isbn>
+                <div class="interested"> Interested in {this.state.listing.assignedUser.displayName}'s listing?
+                 <a class="link" href={'mailto:'+ this.state.listing.assignedUser.email + '?subject=UIUC TEXTBOOK EXCHANGE - Interested in your book '+ this.state.listing.book.title}>Contact them !</a>
+                </div>
             </Flex>
           </Flex>
         </ListingContainer>
