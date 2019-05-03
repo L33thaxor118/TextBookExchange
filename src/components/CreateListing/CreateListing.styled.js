@@ -1,85 +1,47 @@
 import styled from 'styled-components';
 
 export const CreateListingContainer = styled.div`
-  margin-top:0%;
+  padding-top:1%;
+  padding-left:5%;
+  padding-right: 5%;
   display: flex;
+  width: 60%;
+  background-color: rgba(66, 134, 244, 0.3);
+  align-self: center;
   flex-direction: column;
   align-items: center;
-  .background{
-    position: absolute;
-    z-index: -1;
-    height: 100%;
-    width: 80%;
-    background-color: blue;
-    opacity: 0.2;
-  }
 
-  .uploadComponentContainer {
+  .background {
+    width: 70%;
+    padding: 0 5%;
+    background-color: rgba(255, 104, 43, 0.9);
+    border-radius: 15px;
     display: flex;
-    flex-direction: row;
-    height: 30vh;
-    .dragbox {
-      display: flex;
-      width: 20%;
-    }
-    .imagesContainer {
-      display: flex;
-      flex-direction: row;
-      width: 100%;
-      .previewImage {
-        height: 100%;
-        width: 20%;
-        margin-left: 1vh;
-        margin-right: 1vh;
-      }
-    }
+    flex-direction: column;
+    align-items: center;
+    align-self: center;
   }
   .errorMessage{
     display: flex;
     flex-direction: row;
+    padding: 0% 5%;
   }
 
-`;
-
-export const CreateListingMainForm = styled.div`
-  width: 80%;
-  overflow: hidden;
-  margin-top: 2%;
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 5%;
-
-  & .description {
-    width: 100%;
-    height: 25vh;
-  }
-`;
-
-export const Exchange = styled.div`
-  flex-wrap: wrap;
-  overflow: show;
-  width: 80%;
-  margin-top: 3%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
   .offer {
-    display: flex;
-    flex-direction: column;
-    flex-grow:1;
-    h1 {text-align:center;}
+    width: 100%;
   }
 
+  .offerForm {
+    width: 60%;
+
+  }
+  .createListingDescription{
+    width: 100%;
+    margin: 2% 0;
+  }
   .tradeFor {
-    display: flex;
-    flex-direction: column;
-    flex-grow:1;
-    h1 {text-align:center;}
+    width: 100%;
+
   }
 
-  .icon {
-    align-self: center;
-    margin-left: 5%;
-    margin-right: 5%;
-  }
 `;

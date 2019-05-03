@@ -1,40 +1,39 @@
 import styled from 'styled-components';
 
 export const SelectBookContainer = styled.div`
-  opacity: ${props => props.disabled ? 0.5 : 1};
+  padding: 2%;
   display: flex;
-  position: relative;
-  flex-direction: row;
-  align-items: baseline;
-  justify-content: center;
-  h1 {
-    align-self: center;
-    margin-left: 3%;
-    margin-right: 3%;
-  }
+  flex-direction: column;
+  align-items:flex-start;
+  justify-content: flex-start;
 `;
 
 
 export const SelectBookRadioGroup = styled.div`
-  padding: 2%;
-  border-radius:10px;
+  width: 40%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  margin-right: 3%;
-  margin-left: 3%;
-  background-color: ${props => props.selected ? "#4286f4" : "white"};
-  .radio {
+  .radioSelection {
+    font-size: 20px;
     display: flex;
-    align-self: center;
+    flex-direction: row;
+    align-items: baseline;
   }
-  h3 {
-    opacity: ${props => props.selected ? 1 : 0.5};
-    text-align: center;
-    margin-bottom: 10px;
+  .inputBox {
+    display: flex;
+    flex-direction: row;
+    height: 7vh;
   }
-  .input {
-    margin-top:12%;
-    position: relative;
+  .inputContainer {
+    margin-left: 5%;
+    width: 80%;
   }
+  .errorMessage {
+    width: 80%;
+    display: flex;
+    justify-content: stretch;
+    align-items:top;
+    margin-top: 1%;
+  }
+
 `;

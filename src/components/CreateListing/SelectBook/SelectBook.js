@@ -16,6 +16,7 @@ class SelectBook extends Component {
     this.state = {
       dropdownEnabled: true,
       isbnEnabled: false,
+      isbnInput: "",
       modalOpen: false,
       isSearchLoading: false
     };
@@ -25,6 +26,12 @@ class SelectBook extends Component {
     this.closeModal = this.closeModal.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
     this.resetSearch = this.resetSearch.bind(this);
+    this.searchForISBN = this.searchForISBN.bind(this);
+    this.isbnInputChanged = this.isbnInputChanged.bind(this);
+  }
+
+  searchForISBN() {
+    this.props.createBookFormISBNChanged(this.state.isbnInput);
   }
 
   resetSearch() {
@@ -47,6 +54,7 @@ class SelectBook extends Component {
   }
 
   handleRadioChange(event, { value }) {
+    this.props.removeIsbnError();
     if (value === ('isbn' + this.props.name)){
       let searchRef = this.searchRef.current;
       searchRef.setValue('');
@@ -77,60 +85,98 @@ class SelectBook extends Component {
       modalOpen: false
     });
   }
+  isbnInputChanged(event) {
+    console.log(event.target.value);
+    this.props.removeIsbnError();
+    this.setState({
+      isbnInput: event.target.value
+    });
+  }
 
   render() {
     let errorMessage = null;
     if (this.props.createBookHasFailed) {
       errorMessage = (
-        <div>
+        <div className='errorMessage'>
           <Message
+            size='mini'
             color='red'
-            header='Error'
-            content={"failed to find ISBN"}
+            fluid
+            content={"Not found"}
           />
-          <Button type='submit' onClick={this.openModal}>Create your own</Button>
         </div>
       );
-
+    }
+    let search = null;
+    if (this.state.dropdownEnabled) {
+      search = (
+        <Search
+          ref = {this.searchRef}
+          disabled = {!this.state.dropdownEnabled}
+          placeholder='Search for Books'
+          results={this.state.results}
+          onResultSelect={this.props.bookSelected}
+          onSearchChange={_.debounce(this.handleSearchChange, 500, {
+          leading: true,
+          })}
+          minCharacters={3}
+          resultRenderer={resRender}
+        />
+      );
+    }
+    var input = null;
+    let createButton = null;
+    if (this.props.createBookHasFailed) {
+      createButton = (
+        <Button type='submit' onClick={this.openModal}>Create</Button>
+      );
+    }
+    if (this.state.isbnEnabled) {
+      input = (
+        <div className={'inputBox'}>
+          <Input placeholder='Enter 10 or 13 digit ISBN'
+            disabled = {!this.state.isbnEnabled}
+            onChange= {this.isbnInputChanged}
+            loading = {this.props.loading}
+          />
+          <Button onClick={this.searchForISBN}>Search</Button>
+          {createButton}
+        </div>
+      );
     }
     return (
       <SelectBookContainer disabled = {this.props.disabled}>
+      <h2>Select a Book</h2>
         <SelectBookRadioGroup selected = {this.state.dropdownEnabled}>
-          <Radio className={'radio'}
-            name={this.props.name}
-            value={'dropdown' + this.props.name}
-            checked={this.state.dropdownEnabled === true}
-            onChange={this.handleRadioChange} />
-          <h3>Select a book from our list: </h3>
-          <Search
-              ref = {this.searchRef}
-              disabled = {!this.state.dropdownEnabled}
-              placeholder='Search for Books'
-              results={this.state.results}
-              onResultSelect={this.props.bookSelected}
-              onSearchChange={_.debounce(this.handleSearchChange, 500, {
-              leading: true,
-            })}
-              minCharacters={3}
-              resultRenderer={resRender}
-            />
+          <div className={'radioSelection'}>
+            <Radio
+              name={this.props.name}
+              value={'dropdown' + this.props.name}
+              checked={this.state.dropdownEnabled === true}
+              onChange={this.handleRadioChange} />
+            <p>Find by name</p>
+          </div>
+          {search}
         </SelectBookRadioGroup>
         <SelectBookRadioGroup selected = {this.state.isbnEnabled}>
-          <Radio className={'radio'}
+        <div className={'radioSelection'}>
+          <Radio
             name={this.props.name}
             value={'isbn' + this.props.name}
             checked={this.state.isbnEnabled === true}
             onChange={this.handleRadioChange} />
-          <h3>Find by ISBN:</h3>
-          <Input className={'input'} placeholder='Enter 10 or 13 digit ISBN'
-            disabled = {!this.state.isbnEnabled}
-            onChange= {this.props.createBookFormISBNChanged}
-            loading = {this.props.loading}
-             />
-          <Message hidden={!this.props.displayTitle}>{this.props.displayTitle}</Message>
-          {errorMessage}
+          <p>Find by ISBN:</p>
+        </div>
+          <div className={'inputContainer'}>
+            {input}
+            {errorMessage}
+            <Message hidden={!this.props.displayTitle}>{this.props.displayTitle}</Message>
+          </div>
         </SelectBookRadioGroup>
-        <CreateBookModal open = {this.state.modalOpen} close = {this.closeModal}/>
+        <CreateBookModal
+          open = {this.state.modalOpen}
+          close = {this.closeModal}
+        />
       </SelectBookContainer>
     );
   }
