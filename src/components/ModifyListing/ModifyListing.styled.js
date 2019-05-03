@@ -7,6 +7,8 @@ export const ModifyListingContainer = styled.div`
   width: 100%;
   padding-top: 30px;
   margin: 0px 10% 0px 0%;
+  opacity: ${props => props.completed ? 0.1 : 1};
+  pointer-events: ${props => props.completed ? 'none' : 'auto'};
   .bookTitle {
     font-size: 20px;
     font-weight: bold;
@@ -23,13 +25,23 @@ export const ModifyListingContainer = styled.div`
     flex-direction: column;
     align-items: center;
     padding-top: 30px;
-  }
-  .endButtons {
-    margin-top: 5%;
+    .endButtons {
+      margin-top: 5%;
+    }
   }
 `;
 
-export const ImageContainer = styled.div`
+export const MessageCompleted = styled.div`
+  width: 30%;
+  display: flex;
+  align-self: center;
+  margin-top: 10%;
+`;
+export const MessageDeleted = styled.div`
+  width: 30%;
+  display: flex;
+  align-self: center;
+  margin-top: 10%;
 `;
 
 export const PhotosContainer = styled.div`
@@ -44,8 +56,10 @@ export const ExchangeHeader = styled.div`
   width: 100%;
   justify-content: space-around;
   align-items: center;
+  padding: 2% 0 2% 0;
   .price={
-    font-size: 20px;
+    margin-left: 10px;
+    font-size: 25px;
     font-weight: bold;
   }
 `;
