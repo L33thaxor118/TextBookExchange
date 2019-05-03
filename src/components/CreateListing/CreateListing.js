@@ -6,8 +6,9 @@ import _ from 'lodash';
 import { CreateListingContainer } from './CreateListing.styled';
 import PhotoUploadPreview from './PhotoUploadPreview/PhotoUploadPreview';
 import SelectBook from './SelectBook/SelectBook'
-import { authentication, uploadPhotos, fetchPhotoUrls } from '../../utils/firebase'
+import { authentication } from '../../utils/firebase'
 import { connect } from 'react-redux';
+import ImageUpload from '../ImageUpload';
 import { getBooks, createBook, createListing } from '../../redux/actions/index';
 
 const lookupBookByISBN = isbn => axios.get('https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn).then(({ data }) => data);
@@ -48,11 +49,12 @@ class CreateListing extends Component {
       exchangeBookChecked: false,
 
       errors:  {},
-      modalOpen: false
+      modalOpen: false,
+      listingId: ""
     }
-    this.offerBookRef = React.createRef();
-    this.tradeBookRef = React.createRef();
+    this.uppyRef = React.createRef();
     this.bookOptions = [];
+    this.finish = this.finish.bind(this);
     this.handleFileDrop = this.handleFileDrop.bind(this);
     this.handleCreate = this.handleCreate.bind(this);
     this.handleRemovePhoto = this.handleRemovePhoto.bind(this);
@@ -213,15 +215,19 @@ class CreateListing extends Component {
     newListing.imageNames = this.state.imageFileList.map(file => (file.name));
     console.log(newListing);
     try {
-      if (this.state.cashOnly) delete newListing.exchangeBook;
+      if (this.checkIfCashOnly()) delete newListing.exchangeBook;
       let createdListing = await this.props.createListing(newListing);
-      await uploadPhotos(createdListing._id, this.state.imageFileList);
-      console.log(await fetchPhotoUrls(createdListing._id, createdListing.imageNames));
-      this.props.history.push('/listings/' + createdListing._id);
+      this.setState({listingId: createdListing._id}, ()=> {this.finish()});
     } catch(error) {
       this.setInternalError();
       return;
     }
+  }
+
+  async finish() {
+    console.log(this.state.listingId);
+    await this.uppyRef.upload();
+    this.props.history.push('/listings/' + this.state.listingId);
   }
 
   clearErrors(){
@@ -479,9 +485,17 @@ class CreateListing extends Component {
             <Form>
               <Form.Field>
                 <h2>Description</h2>
-                <Form.TextArea className={'description'} placeholder='describe the book here' onChange={this.descriptionChanged}/>
+                <Form.TextArea className={'description'}
+                  placeholder='describe the book here'
+                  onChange={this.descriptionChanged}/>
               </Form.Field>
             </Form>
+            <h2>Upload Images</h2>
+            <ImageUpload
+              listingId={this.state.listingId}
+              trigger = {({ onClick }) =>
+                <Button color='teal' size='massive' icon='upload' onClick={onClick}></Button>}
+              ref={el => this.uppyRef = el}/>
           </div>
           <div className={'tradeFor'}>
             <h2>Exchange for</h2>
