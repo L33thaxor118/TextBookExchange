@@ -29,13 +29,13 @@ library.add(faPlus)
 
 //Source for ProtectedRoute:
 //https://medium.com/@leonardobrunolima/react-tips-how-to-protect-routes-for-unauthorized-access-with-react-router-v4-73c0d451e0a2
-const ProtectedRoute = ({ component: Component, currentUser, ...rest }) => (
+const ProtectedRoute = ({ component: Component, currentUser, children, ...rest }) => (
   <>
     {currentUser !== undefined ? (
       <Route {...rest} render={props => (
-        currentUser !== null ?
-          <Component {...props} /> : (
-            <Redirect
+        currentUser !== null
+          ? (Component ? <Component {...props} /> : <>{children}</>)
+          : <Redirect
               to={{
                 pathname: '/login',
                 state: {
@@ -43,7 +43,6 @@ const ProtectedRoute = ({ component: Component, currentUser, ...rest }) => (
                 }
               }}
             />
-          )
         )}
       />
     ) : null}
@@ -64,25 +63,27 @@ export class App extends Component {
 
     return isLoginStateResolved ? (
       <Router>
-        <Route exact path='/login' component={UserAuthentication}/>
-        <Route>
-          <div className='pageContainer'>
-            <Header />
-            <Switch>
-              <ProtectedRoute exact path='/' component={Home} currentUser={currentUser} />
-              <ProtectedRoute exact path='/dashboard' component={Dashboard} currentUser={currentUser} />
-              <ProtectedRoute exact path='/listings' component={Search} currentUser={currentUser} />
-              <Route
-                exact
-                path='/listings/new'
-                component={CreateListing}
-                currentUser={currentUser}
-              />
-              <Route path='/listings/modify/:id' component ={ModifyListing} currentUser={currentUser} />
-              <ProtectedRoute path='/listings/:id' component={ListingDetails} currentUser={currentUser} />
-            </Switch>
-          </div>
-        </Route>
+        <Switch>
+          <Route exact path='/login' component={UserAuthentication}/>
+          <ProtectedRoute path='/:path*' currentUser={currentUser}>
+            <div className='pageContainer'>
+              <Header />
+              <Switch>
+                <Route exact path='/' component={Home} currentUser={currentUser} />
+                <Route exact path='/dashboard' component={Dashboard} currentUser={currentUser} />
+                <Route exact path='/listings' component={Search} currentUser={currentUser} />
+                <Route
+                  exact
+                  path='/listings/new'
+                  component={CreateListing}
+                  currentUser={currentUser}
+                />
+                <Route path='/listings/modify/:id' component={ModifyListing} currentUser={currentUser} />
+                <Route path='/listings/:id' component={ListingDetails} currentUser={currentUser} />
+              </Switch>
+            </div>
+          </ProtectedRoute>
+        </Switch>
       </Router>
     ) : (
       <Flex alignItems='center' style={{height: '100vh'}}>
