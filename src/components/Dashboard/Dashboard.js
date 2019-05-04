@@ -131,7 +131,7 @@ class Dashboard extends Component {
 
 	async navigateToListingEdit(id) {
 		// change to listing edit when view created, now going to listings details
-		this.props.history.push(`/listings/${id}`);
+		this.props.history.push(`/listings/modify/${id}`);
 	}
 
 	async navigateToBookSearch(query) {
@@ -168,13 +168,13 @@ class Dashboard extends Component {
 				this.addBookToWishlist();
 			}
 		}
-		else { 
+		else {
 			wl = this.state.wishlist;
 			if (wl.some(e => e.isbn === this.state.wishlistIsbn)) { // book already in wl
 				this.setState({errorDupl:true});
 			}
 			else {
-				try { 
+				try {
 					var books = this.state.books;
 					var newBook;
 					if (books.some(e => e.isbn === this.state.wishlistIsbn)) {
@@ -222,7 +222,7 @@ class Dashboard extends Component {
 	      wishlistBookTitle: text
 	    });
   	};
-    
+
 	toggle (index) {
 		this.setState({showIndex:index});
 	}
@@ -276,8 +276,8 @@ class Dashboard extends Component {
 								      	<Button className="listing-buttons" icon color='red' labelPosition='left' type='submit' size='tiny' onClick={() => this.handleDeleteListing(listing._id)}>
 								      	<Icon name='trash' />
 								      	Delete
-								      </Button>	
-								      </div>					        
+								      </Button>
+								      </div>
 							      </List.Content>
 
 							    </List.Item>)
@@ -315,16 +315,16 @@ class Dashboard extends Component {
   						  onClick = {this.hideMessage}
   						/>
   						<br></br>
-  						<Button icon 
-  						color='red' 
+  						<Button icon
+  						color='red'
   						labelPosition='left'
   						type='submit'
 						className="form-elem"
-  						onClick={this.handleWishlistAdd}> 
+  						onClick={this.handleWishlistAdd}>
   							Add to wishlist !
   							<Icon name='heart' />
   						</Button>
-  					
+
 					{errorDupl && <Message
 						  className="error-msg"
 					      error
@@ -338,7 +338,7 @@ class Dashboard extends Component {
 					 {bookAdded && <Message
 					 	  className="error-msg"
 					      positive
-					      header= {this.state.currBookTitle+' added to your wishlist !'} 
+					      header= {this.state.currBookTitle+' added to your wishlist !'}
 					    />}
 
 					   </div>
@@ -353,15 +353,15 @@ class Dashboard extends Component {
 								          {book.authors.join(', ')}
 								        </AuthorsList>
 								    	}
-								      	
+
 								      <Button icon labelPosition='left' type='submit' size='tiny' onClick={() => this.navigateToBookSearch(book.title)}>
 								      	<Icon name='search' />
 								      	Find listings
-								      </Button>	     
+								      </Button>
 									<Button icon color='red' labelPosition='left' type='submit' size='tiny' onClick={() => this.handleDeleteWishlist(book, index)}>
 								      	<Icon name='trash' />
 								      	Remove
-								      </Button>	
+								      </Button>
 							      </List.Content>
 
 							    </List.Item>)
@@ -371,7 +371,7 @@ class Dashboard extends Component {
 							</Grid.Column>
 						</Grid>
 					 </div>
-	 
+
 :
 				null
 				)

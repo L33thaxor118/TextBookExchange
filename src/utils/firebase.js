@@ -45,7 +45,7 @@ export const deleteListingPhotos = async (listingId, imageNames) => {
   await Promise.all(imageNames.map(name => {
     const imageRef = storageRef.child(listingId + '/' + name);
     return imageRef.delete();
-  })).catch((error)=>{return error;});
+  }));
 
   return "success";
 

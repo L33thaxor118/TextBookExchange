@@ -366,7 +366,11 @@ class CreateListing extends Component {
 
   priceChanged(event){
     const updatedListing = this.state.newListing;
-    updatedListing.price = parseInt(event.target.value);
+    if (event.target.value.length === 0) {
+      updatedListing.price = 0;
+    } else {
+      updatedListing.price = parseInt(event.target.value);
+    }
     let errors = this.state.errors;
     errors.emptyCash= false;
     this.setState({
