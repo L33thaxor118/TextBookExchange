@@ -5,6 +5,8 @@ import { Flex } from '@rebass/grid';
 import PhotosCarousel from './PhotosCarousel/PhotosCarousel';
 import './ListingDetails.scss'
 import { fetchPhotoUrls } from '../../utils/firebase';
+import { connect } from 'react-redux';
+
 
 import {
   ListingContainer,
@@ -24,11 +26,14 @@ class ListingDetails extends React.Component {
       listing: null,
       photos:[]
     };
+    this.handleEditClicked = this.handleEditClicked.bind(this);
   }
 
   async componentDidMount() {
+    console.log(this.props.user);
     const { id } = this.props.match.params;
     const { listing } = await listingsApi.get({ id });
+    console.log(listing);
     this.setState({ listing });
     const photoUrls = await fetchPhotoUrls(listing._id, listing.imageNames);
     console.log(photoUrls);
@@ -40,7 +45,17 @@ class ListingDetails extends React.Component {
     this.setState({photos});
   }
 
+  handleEditClicked() {
+    this.props.history.push('/listings/modify/' + this.state.listing._id);
+  }
+
   render() {
+    let modifyButton = null;
+    if (this.state.listing) {
+      if (this.props.user._id === this.state.listing.assignedUser._id) {
+        modifyButton = (<Button onClick={this.handleEditClicked} color='blue' icon='edit'>This listing is yours. Edit!</Button>)
+      }
+    }
     return (
       this.state.listing ? (
         <ListingContainer>
@@ -59,17 +74,18 @@ class ListingDetails extends React.Component {
                       <div class="price"> Condition: {this.state.listing.condition}</div>
                       <div class="price">Last updated: {moment(this.state.listing.dateCreated).format('MMMM DD, YYYY H:mm:ss ')}</div>
                       <div class="price">Listed by: {this.state.listing.assignedUser.displayName}</div>
+                      {modifyButton}
                     </Segment>
                   </Flex>
                   </div>
                 </Flex>
                 <Isbn> ISBN: {this.state.listing.book.isbn}</Isbn>
-                <div class="interested"> 
+                <div class="interested">
                 <p>Interested in this listing?</p>
-                  <Button> 
-                    <a class="link" 
-                      href={'mailto:'+ 
-                            this.state.listing.assignedUser.email + 
+                  <Button>
+                    <a class="link"
+                      href={'mailto:'+
+                            this.state.listing.assignedUser.email +
                             '?subject=UIUC TEXTBOOK EXCHANGE - Interested in your book '
                             + this.state.listing.book.title}>
                       {"Contact " + this.state.listing.assignedUser.displayName}
@@ -84,4 +100,4 @@ class ListingDetails extends React.Component {
   }
 };
 
-export default ListingDetails;
+export default connect(state => state.loginState)(ListingDetails);

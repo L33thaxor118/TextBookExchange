@@ -1,4 +1,4 @@
-import React, { Component } from 'react'; 
+import React, { Component } from 'react';
 import { Icon } from 'semantic-ui-react';
 import { Flex } from '@rebass/grid';
 import './PhotosCarousel.scss';
@@ -41,11 +41,11 @@ class PhotosCarousel extends Component {
 
 	render () {
     	return (
-    		<div>
+    		<div className='carouselzzz'>
     		<Flex flexDirection='row' width={1} alignItems='center'>
-    		<Icon name='angle left' size='large' onClick={() => this.goPrev()}/>
-			<img src={this.state.photos[this.state.currPhoto]} class="img" alt="book's photos"/>
-    		<Icon name='angle right' size='large' onClick={() => this.goNext()}/>
+    		<Icon className= 'carouselzzzIcon' name='angle left' size='large' onClick={() => this.goPrev()}/>
+					<img src={this.state.photos[this.state.currPhoto]} class="carouselImg" alt="book's photos"/>
+    		<Icon className= 'carouselzzzIcon' name='angle right' size='large' onClick={() => this.goNext()}/>
     		</Flex>
 
     		</div>

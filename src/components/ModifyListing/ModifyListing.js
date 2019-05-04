@@ -36,6 +36,7 @@ class ModifyListing extends React.Component {
       removedPhotoNames: [],
       deleted: false,
       updated: false,
+      loading: false,
       errors: {
         emptyPrice: false,
         emptyCondition: false,
@@ -133,6 +134,7 @@ class ModifyListing extends React.Component {
   }
 
   handleUpdateClicked() {
+    this.setState({loading: true});
     this.clearErrors();
   }
 
@@ -159,6 +161,7 @@ class ModifyListing extends React.Component {
     this.setState({errors});
     for (let key in errors) {
       if (errors[key] === true) {
+          this.setState({loading: false});
           return;
       }
     }
@@ -182,16 +185,17 @@ class ModifyListing extends React.Component {
         description: updatedListing.description,
         statusCompleted: updatedListing.statusCompleted,
         price: updatedListing.price,
+        condition: updatedListing.condition,
         imageNames: updatedListing.imageNames
       });
-      console.log("here3")
+      this.setState({loading: false});
       this.props.history.push('/listings/' + this.state.listing._id);
     }
     catch(err){
       console.log(err);
       let errors = this.state.errors;
       errors.internal = true;
-      this.setState({errors});
+      this.setState({errors, loading: false});
     }
     // await this.uppyRef.upload();
   }
@@ -355,7 +359,9 @@ class ModifyListing extends React.Component {
 
                 <Form.Field inline>
                   <label>Condition</label>
-                  <Form.Select options={conditionOptions}
+                  <Form.Select
+                    className={'condition'}
+                    options={conditionOptions}
                     value={this.state.listing.condition}
                     placeholder='Condition'
                     onChange={this.handleConditionChanged}/>
@@ -391,7 +397,7 @@ class ModifyListing extends React.Component {
               Successfuly updated listing
             </Message>
             <div className='endButtons'>
-              <Button fluid className='b1' color='green' onClick={this.handleUpdateClicked}> Update Listing</Button>
+              <Button fluid className='b1' color='green' loading={this.state.loading} onClick={this.handleUpdateClicked}> Update Listing</Button>
               <Button fluid className='b2' color='red' onClick={this.handleCancelClicked}> Cancel </Button>
               <Button fluid className='b3' color='red' inverted onClick={this.handleDeleteClicked}> Delete </Button>
             </div>

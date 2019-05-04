@@ -1,4 +1,4 @@
-.img {
+.carouselImg {
     position: relative;
     float: left;
     width:  240px;
@@ -6,4 +6,10 @@
     background-position: 50% 50%;
     background-repeat:   no-repeat;
     background-size:     cover;
+}
+
+.carouselzzz {
+  .carouselzzzIcon:hover {
+    cursor: pointer;
+  }
 }

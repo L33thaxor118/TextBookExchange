@@ -135,6 +135,7 @@ class CreateListing extends Component {
   }
 
   validateListing() {
+    console.log(this.state.newListing);
     let errors = this.state.errors;
     let newListing = this.state.newListing;
     if (!this.state.cashChecked && !this.state.exchangeBookChecked) {
@@ -420,7 +421,7 @@ class CreateListing extends Component {
 
   render() {
     var bookOptions = this.props.books.map( book => ({isbn: book.isbn, title: book.title, authors: book.authors, id: book._id }) )
-    
+
     return (
       <CreateListingContainer>
         <h1>Create a New Listing</h1>
@@ -447,16 +448,6 @@ class CreateListing extends Component {
               selection
               options={conditionOptions}
               onChange={this.conditionSelected}
-            />
-            <Message
-              error
-              hidden={!this.state.errors.emptyBook}
-              content='Please select a valid book'
-            />
-            <Message
-              error
-              hidden={!this.state.errors.emptyCondition}
-              content="Please enter your book's condition"
             />
             <Form.TextArea
               label='Description'
@@ -516,15 +507,25 @@ class CreateListing extends Component {
           </Form>
           <Message error
             hidden={!(this.state.errors.emptyExchangeBook)}>
-            Please select a valid book
+            You selected to exchange for a book. Please select a valid book
           </Message>
           <Message error
             hidden={!(this.state.errors.emptyCash)}>
             You selected cash. Please specify a price
           </Message>
+          <Message
+            error
+            hidden={!this.state.errors.emptyBook}
+            content='Please select a valid book to offer'
+          />
+          <Message
+            error
+            hidden={!this.state.errors.emptyCondition}
+            content="Please enter your book's condition"
+          />
           <Message error
             hidden={!(this.state.errors.emptyExchange)}>
-            Please select at least one option
+            Please select at least one checkBox
           </Message>
           <Button type='submit' color='blue' onClick={this.clearErrors}>Create</Button>
         </div>

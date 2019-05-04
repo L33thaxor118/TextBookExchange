@@ -1,4 +1,4 @@
-import { Button, List, Image, Icon, Header, Dropdown, Input, Message, Grid } from 'semantic-ui-react';
+import { Button, List, Image, Icon, Header, Dropdown, Input, Message, Grid, Loader } from 'semantic-ui-react';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Flex } from '@rebass/grid';
@@ -38,7 +38,8 @@ class Dashboard extends Component {
 			errorDupl: false,
 			bookAdded: false,
 			showIndex:0,
-			currBookTitle:''
+			currBookTitle:'',
+      loading: false
 		}
 		this.handleDeleteListing = this.handleDeleteListing.bind(this);
 		this.handleDeleteWishlist = this.handleDeleteWishlist.bind(this);
@@ -48,17 +49,17 @@ class Dashboard extends Component {
 		this.handleWishlistAdd = this.handleWishlistAdd.bind(this);
 		this.hideMessage = this.hideMessage.bind(this);
 		this.addBookToWishlist = this.addBookToWishlist.bind(this);
-
 	}
 
 	async componentDidMount() {
+    this.setState({loading: true});
 		const { user } = this.props;
 		const { books } = await booksApi.get({});
 		const { listings } = await listingsApi.get({ userId: user.firebaseId });
 
 		const photoUrls = await new Promise(async resolve => {
 			const urls = [];
-			
+
 			for (let listing of listings) {
 				if (listing.imageNames.length) {
 					try {
@@ -72,6 +73,7 @@ class Dashboard extends Component {
 					urls.push(STOCK_PHOTO_URL);
 				}
 			}
+      this.setState({loading: false});
 
 			resolve(urls);
 		});
@@ -101,7 +103,7 @@ class Dashboard extends Component {
 	async handleDeleteListing(id) {
 		const deletedListing = await listingsApi.delete({id});
 		if (deletedListing) {
-			const listingIndex = this.state.listingIds.indexOf(id);
+			  const listingIndex = this.state.listingIds.indexOf(id);
 	    	const newListingIds = [].concat(this.state.listingIds);
 	    	newListingIds.splice(listingIndex, 1);
 	    	const newListings = [].concat(this.state.listings);
@@ -110,6 +112,7 @@ class Dashboard extends Component {
 	    	newPhotoUrls.splice(listingIndex, 1);
 	    	this.setState({listingIds:newListingIds, listings: newListings, photoUrls: newPhotoUrls});
     	}
+
 
 	}
 
@@ -133,6 +136,10 @@ class Dashboard extends Component {
 		// change to listing edit when view created, now going to listings details
 		this.props.history.push(`/listings/modify/${id}`);
 	}
+
+  async navigateToListingView(id) {
+    this.props.history.push(`/listings/${id}`)
+  }
 
 	async navigateToBookSearch(query) {
 		console.log(query);
@@ -238,6 +245,12 @@ class Dashboard extends Component {
 		const dashboardMenu = ['Your Listings', 'Your Wishlist'];
 
 		var bookOptions = this.state.books.map( book => ({key: book.isbn, text: book.title, value: book._id }) )
+    if (this.state.loading) {
+      return (
+        <Flex alignItems='center' style={{height: '100vh'}}>
+          <Loader active inline='centered' content='Loading' />
+        </Flex>);
+    } else {
 		return (
 			<div id="dashboard-content">
 			<Header as='h2' textAlign='center'>Dashboard </Header>
@@ -273,6 +286,7 @@ class Dashboard extends Component {
 								      	<Icon name='edit' />
 								      	Edit
 								      </Button>
+                      <Button className="listing-buttons" icon labelPosition='left' type='submit' color='blue' size='tiny' onClick={() => this.navigateToListingView(listing._id)}> View Listing</Button>
 								      	<Button className="listing-buttons" icon color='red' labelPosition='left' type='submit' size='tiny' onClick={() => this.handleDeleteListing(listing._id)}>
 								      	<Icon name='trash' />
 								      	Delete
@@ -379,7 +393,7 @@ class Dashboard extends Component {
 
         	</div>
 		)
-
+    }
 	}
 }
 

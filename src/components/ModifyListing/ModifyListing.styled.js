@@ -25,6 +25,12 @@ export const ModifyListingContainer = styled.div`
     flex-direction: column;
     align-items: center;
     padding-top: 30px;
+    .condition {
+      text-transform: capitalize;
+      & .text {
+        text-transform: capitalize;
+      }
+    }
     .endButtons {
       display: flex;
       flex-direction: row;

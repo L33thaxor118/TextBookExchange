@@ -8,15 +8,19 @@ export const CreateListingContainer = styled.div`
   width: 100%;
   height: 100vh;
 
-  background-color: rgba(66, 134, 244, 0.3);
+  background-color: rgba(0, 32, 88, 0.8);
   align-self: center;
   flex-direction: column;
   align-items: center;
+  h1 {
+    color: white;
+    margin-bottom: 5%:
+  }
 
   .background {
     width: 700px;
     padding: 30px 30px;
-    background-color: rgba(255, 104, 43, 0.9);
+    background-color: rgba(233,74,55, 0.9);
     border-radius: 15px;
     display: flex;
     flex-direction: column;
@@ -27,6 +31,7 @@ export const CreateListingContainer = styled.div`
     display: flex;
     flex-direction: row;
     padding: 0% 5%;
+
   }
 
   & textarea {
