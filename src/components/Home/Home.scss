@@ -1,0 +1,49 @@
+$theme-blue: #002058;
+
+html, body, #container, .carousel {
+	height:100%;
+	margin: 0;
+	width: 100%;
+}
+
+.heading{
+	text-align: center;
+	font-size: 24px;
+	color: $theme-blue;
+	padding-top: 20px;
+}
+
+.image-slide {
+    height: 600px;
+    width: 500px;
+    transition: background-image .3s ease-in-out;
+    display:block;
+	margin:auto;
+
+	&:hover {
+		background-color:#000;
+		opacity:0.5;
+		cursor: pointer;
+	  }
+}
+
+.slide-arrow {
+	color: $theme-blue;
+	cursor: pointer;
+	font-size: 2rem;
+	position: fixed;
+	top: 50%;
+	
+	&:hover {
+		background-color: white;
+		opacity:0.5;
+	}
+}
+
+.slide-arrow.right {
+	right: 30rem;
+}
+
+.slide-arrow.left {
+	left: 30rem;
+}

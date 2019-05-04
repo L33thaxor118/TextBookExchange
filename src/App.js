@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 
+import { Loader } from 'semantic-ui-react';
+import { Flex } from '@rebass/grid';
+
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faExchangeAlt, faUpload, faPlus} from '@fortawesome/free-solid-svg-icons'
 import UserAuthentication from './components/SignIn';
@@ -10,7 +13,7 @@ import ListingDetails from './components/ListingDetails';
 import ModifyListing from './components/ModifyListing';
 import Search from './components/Search';
 import Dashboard from './components/Dashboard';
-
+import Home from './components/Home';
 import Header from './components/Header';
 
 // Stylesheets
@@ -66,6 +69,7 @@ export class App extends Component {
           <div className='pageContainer'>
             <Header />
             <Switch>
+              <ProtectedRoute exact path='/' component={Home} currentUser={currentUser} />
               <ProtectedRoute exact path='/dashboard' component={Dashboard} currentUser={currentUser} />
               <ProtectedRoute exact path='/listings' component={Search} currentUser={currentUser} />
               <Route
@@ -80,7 +84,11 @@ export class App extends Component {
           </div>
         </Route>
       </Router>
-    ) : null;
+    ) : (
+      <Flex alignItems='center' style={{height: '100vh'}}>
+        <Loader active inline='centered' content='Loading' />
+      </Flex>
+    );
   }
 }
 

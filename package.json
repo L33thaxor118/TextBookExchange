@@ -16,8 +16,10 @@
     "firebase": "^5.9.4",
     "fuse.js": "^3.4.4",
     "lodash": "^4.17.11",
+    "mail": "^0.2.3",
     "moment": "^2.24.0",
     "node-sass": "^4.11.0",
+    "pure-react-carousel": "^1.19.4",
     "rc-slider": "^8.6.9",
     "react": "^16.8.6",
     "react-bootstrap": "^1.0.0-beta.8",
@@ -46,5 +48,8 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "css-loader": "^2.1.1"
+  }
 }

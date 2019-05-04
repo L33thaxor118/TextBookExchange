@@ -14,9 +14,20 @@ export const SearchContainer = styled.div`
   & .segment.bottom {
     padding: 0px;
     border: none!important;
+    overflow-x: scroll;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
     & > .segments, .segment {
       border-radius: 0px;
+    }
+
+    & .placeholder {
+      width: 100%;
     }
   }
 
