@@ -1,9 +1,9 @@
 # TextBook Exchange
 
-#### Create an account and post a listing to exchange your used textbooks for other books and/or cash. Made with React. Demo video: https://www.youtube.com/watch?v=MkMGnAZrIRg&feature=youtu.be&fbclid=IwAR0Ty8JS0eHeuul_dS9ZnXoPv0en9Oaibyh-myFpivtwXKzvPE_Tg2AEPuQ
- 
-## Live website (not responsive, designed for laptop/desktop screen sizes)
-https://uofi-book-exchange.herokuapp.com/ 
+#### Create an account and post a listing to exchange your used textbooks for other books and/or cash. Made with React.  
+**Demo video**: https://www.youtube.com/watch?v=MkMGnAZrIRg&feature=youtu.be&fbclid=IwAR0Ty8JS0eHeuul_dS9ZnXoPv0en9Oaibyh-myFpivtwXKzvPE_Tg2AEPuQ  
+
+**Live website** (*not responsive, designed for laptop/desktop screen sizes*): https://uofi-book-exchange.herokuapp.com/ 
 
 ## Secure login powered by Firebase
 Create an account and start exchanging. 
@@ -28,7 +28,7 @@ Show your book to other users by uploading photos and details.
 ![alt text](https://github.com/L33thaxor118/Illinihub/blob/master/screenshots/Screenshot_20181128-215128_IlliniHub.jpg)
 
 
-## Change your listings anytime
+## Edit your listing
 Add or remove photos and change other details of any of your listings provided the deal isnt sealed.
 
 ![alt text](https://github.com/L33thaxor118/Illinihub/blob/master/screenshots/Screenshot_20181128-215128_IlliniHub.jpg)
