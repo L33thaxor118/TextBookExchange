@@ -8,9 +8,7 @@
 ## Secure login powered by Firebase
 Create an account and start exchanging. 
 
-![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/login1.png)
 ![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/login2.png)
-![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/login3.png)
 
 ## Homepage
 Click on a book in the homepage carousel to find listings for it.  
@@ -21,8 +19,6 @@ Click on a book in the homepage carousel to find listings for it.
 ## Search listings
 Search by texbook name and filter the results by price or condition.
 
-![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/search1.png)
-
 ![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/search2.png)
 
 
@@ -30,8 +26,6 @@ Search by texbook name and filter the results by price or condition.
 Show your book to other users by uploading photos and details.
 
 ![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/createnew1.png)
-
-![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/upload1.png)
 
 
 ## Edit your listing
