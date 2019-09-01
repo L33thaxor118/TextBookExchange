@@ -8,42 +8,48 @@
 ## Secure login powered by Firebase
 Create an account and start exchanging. 
 
-![alt text](https://github.com/L33thaxor118/Illinihub/blob/master/screenshots/Screenshot_20181128-215128_IlliniHub.jpg)
+![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/login1.png)
+![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/login2.png)
+![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/login3.png)
 
 ## Homepage
 Click on a book in the homepage carousel to find listings for it.  
 
-![alt text](https://github.com/L33thaxor118/Illinihub/blob/master/screenshots/Screenshot_20181128-215128_IlliniHub.jpg)
+![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/homescreen1.png)
 
 
 ## Search listings
 Search by texbook name and filter the results by price or condition.
 
-![alt text](https://github.com/L33thaxor118/Illinihub/blob/master/screenshots/Screenshot_20181128-215128_IlliniHub.jpg)
+![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/search1.png)
+
+![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/search2.png)
 
 
 ## Post a new listing
 Show your book to other users by uploading photos and details.
 
-![alt text](https://github.com/L33thaxor118/Illinihub/blob/master/screenshots/Screenshot_20181128-215128_IlliniHub.jpg)
+![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/createnew1.png)
+
+![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/upload1.png)
 
 
 ## Edit your listing
 Add or remove photos and change other details of any of your listings provided the deal isnt sealed.
 
-![alt text](https://github.com/L33thaxor118/Illinihub/blob/master/screenshots/Screenshot_20181128-215128_IlliniHub.jpg)
+![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/edit1.png)
 
 
 ## Dashboard
 All your listings will appear on your dashboard so you can edit, view or delete them with ease. You can also access your wishlist from here.
 
-![alt text](https://github.com/L33thaxor118/Illinihub/blob/master/screenshots/Screenshot_20181128-215128_IlliniHub.jpg)
+![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/dashboard1.png)
 
 
 ## Wish List
 Add books you want to a wishlist where you can easily search for their listings without typing them in the searchbar.
 
-![alt text](https://github.com/L33thaxor118/Illinihub/blob/master/screenshots/Screenshot_20181128-215128_IlliniHub.jpg)
+![alt text](https://raw.githubusercontent.com/L33thaxor118/TextBookExchange/master/screenshots/wishlist1.png)
 
 
 
